@@ -1,4 +1,4 @@
-# ProfitFolio (個人投資組合追蹤器)
+# ProfitFolio
 
 ProfitFolio 是一個web-based的個人投資組合追蹤系統。
 
@@ -7,15 +7,15 @@ ProfitFolio 是一個web-based的個人投資組合追蹤系統。
 ## Features
 
 ### M1: 多層級資產管理
-* [x] **多投資組合 (Portfolio) 管理**：
+* [ ] **多投資組合 (Portfolio) 管理**：
     * 支援建立多個獨立的投資組合（例如：「真實持倉」、「虛擬策略A」）。
     * 可設定組合類型（真實 / 虛擬）。
-* [x] **多帳戶 (Account) 管理**：
+* [ ] **多帳戶 (Account) 管理**：
     * 在每個投資組合下，可建立多個帳戶（例如：「Binance」、「Firstrade」）。
     * 所有資產和交易紀錄都歸屬於特定帳戶。
 
 ### M2: 交易與持倉
-* [x] **手動交易紀錄 (Transaction)**：
+* [ ] **手動交易紀錄 (Transaction)**：
     * 支援手動輸入「買入 (Buy)」與「賣出 (Sell)」的交易紀錄。
     * 紀錄欄位包含：交易時間、標的、數量、成交單價、手續費。
 * [ ] **自動持倉計算 (Position)**：
@@ -34,9 +34,9 @@ ProfitFolio 是一個web-based的個人投資組合追蹤系統。
     * 提供圓餅圖，顯示資產類別（例如：加密貨幣、ETF、股票）的佔比。
 
 ### M4: 基礎設定
-* [x] **資產標的 (Asset) 管理**：
+* [ ] **資產標的 (Asset) 管理**：
     * 使用者可自定義要追蹤的資產標的（例如：BTC, VT, 0050）。
-* [x] **資產類別 (AssetType) 管理**：
+* [ ] **資產類別 (AssetType) 管理**：
     * 使用者可自定義資產的分類（例如：加密貨幣、美股ETF、台股）。
 * [ ] **使用者系統 (User)**：
     * (初期可簡化為單一使用者，但資料庫已規劃)
@@ -46,7 +46,7 @@ ProfitFolio 是一個web-based的個人投資組合追蹤系統。
 ## Tech Stack
 
 * **後端 (Backend):**
-    * **Framework:** FastAPI (Python 3.10+)
+    * **Framework:** FastAPI (Python 3.13)
     * **Database:** PostgreSQL
     * **ORM / DB Toolkit:** SQLModel
     * **API:** RESTful API
@@ -58,7 +58,7 @@ ProfitFolio 是一個web-based的個人投資組合追蹤系統。
     * **UI Library:** (待定, 例如 Element Plus 或 Vuetify)
     * **Charts:** ECharts 或 Chart.js
 * **資料庫 (Database):**
-    * PostgreSQL 15+
+    * PostgreSQL 18
 
 ---
 

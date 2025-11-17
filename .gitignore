@@ -1,0 +1,27 @@
+# --- Secrets ---
+**/.env
+
+# --- Python (backend) ---
+backend/.venv/
+backend/__pycache__/
+*.pyc
+.uv_cache/
+
+# --- Node.js (frontend) ---
+frontend/node_modules/
+frontend/dist/
+
+# NPM、pnpm、Yarn 錯誤日誌
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- OS / Editor ---
+# 忽略 macOS 系統檔案
+.DS_Store
+
+# 忽略 VSCode 的本地設定
+.vscode/
+
+# 忽略 Vim 暫存檔
+*.swp
