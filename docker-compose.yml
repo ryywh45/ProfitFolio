@@ -9,7 +9,8 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app
+      - .:/workspace
+    working_dir: /workspace/backend
     command: fastapi run main.py
     environment:
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db/${DB_NAME}
@@ -24,8 +25,9 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend:/app
-      - /app/node_modules # 防止本機 node_modules 覆蓋容器的
+      - .:/workspace
+      - /workspace/frontend/node_modules # 防止本機 node_modules 覆蓋容器的
+    working_dir: /workspace/frontend
     command: npm run dev -- --host
     
   db:
