@@ -68,3 +68,5 @@ ProfitFolio 是一個web-based的個人投資組合追蹤系統。
 * **歷史績效圖表**：紀錄每日的投資組合總價值，並繪製歷史績F效曲線。
 * **股息/利息紀錄**：新增「股息 (Dividend)」交易類型，納入投報率計算。
 * **Docker 化**：使用 `docker-compose.yml` 將 FastAPI, Vue (Nginx) 和 Postgres 打包，實現一鍵部署。
+
+(test)
