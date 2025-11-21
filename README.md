@@ -5,21 +5,21 @@
 ### Phase 1: 專案基建 (Infrastructure Initialization)
 > **目標**：確保前後端環境可運行，資料庫可連線。
 
-- [ ] **`feat/01-project-init`**
+- [x] **`feat/01-project-init`**
     - [x] **System**: 建立 Git Repo，設定 `.gitignore`。
     - [x] **Backend**: 初始化 FastAPI 專案結構 (`app/main.py`, `app/core/config.py`)。
     - [x] **Frontend**: 把ai提前設計好的東西貼上來。
     - [x] **Docker**: 設定 `docker-compose.yml`。
-- [ ] **`feat/02-db-connection`**
-    - [ ] **Backend**: 設定 `SQLModel` 連線字串與 Engine。
-    - [ ] **DB**: 確認可成功連線並寫入資料。
+- [x] **`feat/02-db-connection`**
+    - [x] **Backend**: 設定 `SQLModel` 連線字串與 Engine。
+    - [x] **DB**: 確認可成功連線並寫入資料。
 
 ### Phase 2: 資產標的管理 (Asset Management)
 > **目標**：建立可被交易的「物品」（如 BTC, Stock）。
 
 - [ ] **`feat/03-asset-crud`**
-    - [ ] **DB**: 定義 `Asset` Model (table: `assets`)，包含 `type` Check Constraint。
-    - [ ] **Backend**: 實作 `GET /assets` (列表) 與 `POST /assets` (新增) API。
+    - [x] **DB**: 定義 `Asset` Model (table: `assets`)，包含 `type` Check Constraint。
+    - [x] **Backend**: 實作 `GET /assets` (列表) 與 `POST /assets` (新增) API。
     - [ ] **Data**: 撰寫種子資料腳本 (Seed Data)，預設寫入：USD, TWD, BTC, ETH, AAPL, TSLA, VTI, VOO。
     - [ ] **Frontend**: Assets頁面微調、接API，可新增Asset。
 
