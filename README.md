@@ -7,7 +7,7 @@
 
 - [ ] **`feat/01-project-init`**
     - [x] **System**: 建立 Git Repo，設定 `.gitignore`。
-    - [ ] **Backend**: 初始化 FastAPI 專案結構 (`app/main.py`, `app/core/config.py`)。
+    - [x] **Backend**: 初始化 FastAPI 專案結構 (`app/main.py`, `app/core/config.py`)。
     - [x] **Frontend**: 把ai提前設計好的東西貼上來。
     - [x] **Docker**: 設定 `docker-compose.yml`。
 - [ ] **`feat/02-db-connection`**

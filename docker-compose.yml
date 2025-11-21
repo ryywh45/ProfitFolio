@@ -12,7 +12,7 @@ services:
       - .:/workspace
       - ./sqlite_data:/data
     working_dir: /workspace/backend
-    command: fastapi run main.py
+    command: fastapi run app/main.py
 
   frontend:
     build:
