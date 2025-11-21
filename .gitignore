@@ -25,3 +25,9 @@ yarn-error.log*
 
 # 忽略 Vim 暫存檔
 *.swp
+
+# Ignore SQLite database data
+sqlite_data/*
+!sqlite_data/.gitkeep
+*.db
+*.sqlite3

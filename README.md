@@ -6,48 +6,27 @@
 > **目標**：確保前後端環境可運行，資料庫可連線。
 
 - [ ] **`feat/01-project-init`**
-    - [ ] **System**: 建立 Git Repo，設定 `.gitignore`。
+    - [x] **System**: 建立 Git Repo，設定 `.gitignore`。
     - [ ] **Backend**: 初始化 FastAPI 專案結構 (`app/main.py`, `app/core/config.py`)。
-    - [ ] **Frontend**: 把ai提前設計好的東西貼上來。
-    - [ ] **Docker**: 設定 `docker-compose.yml`。
+    - [x] **Frontend**: 把ai提前設計好的東西貼上來。
+    - [x] **Docker**: 設定 `docker-compose.yml`。
 - [ ] **`feat/02-db-connection`**
     - [ ] **Backend**: 設定 `SQLModel` 連線字串與 Engine。
-    - [ ] **DB**: 確認 Container 啟動後可成功連線並寫入資料。
+    - [ ] **DB**: 確認可成功連線並寫入資料。
 
-<!-- ### Phase 2: 使用者與認證 (User & Auth)
-
-- [ ] **`feat/03-user-schema-api`**
-    - [ ] **DB**: 定義 `User` Model (table: `users`)。
-    - [ ] **Backend**: 實作 Password Hashing (使用 bcrypt 或 argon2)。
-    - [ ] **Backend**: 實作 `POST /auth/register` (註冊 API)。
-    - [ ] **Backend**: 實作 `POST /auth/token` (登入 API，回傳 JWT)。
-    - [ ] **Frontend**: 建立 Pinia `UserStore` 管理登入狀態。
-- [ ] **`feat/04-login-ui`**
-    - [ ] **Frontend**: 製作「登入頁面」與「註冊頁面」。
-    - [ ] **Frontend**: 實作 JWT Token 儲存 (LocalStorage) 與 Axios Interceptor (自動帶入 Token)。 -->
-
-### Phase 2: 使用者與認證 (User & Auth) - [簡化]
-> 暫時用固定單一使用者
-
-- [ ] **`feat/03-user-schema-mock`**
-    - [ ] **DB**: 建立簡單的 `users` table (id, username)。
-    - [ ] **DB**: 手動 Insert 一筆資料: `INSERT INTO users (id, username) VALUES (1, 'me');`。
-    - [ ] **Backend**: 實作 `get_current_user` dependency，永遠回傳 user_id=1。
-    - [ ] **Frontend**: 跳過登入頁製作，Router 預設導向 Dashboard。
-
-### Phase 3: 資產標的管理 (Asset Management)
+### Phase 2: 資產標的管理 (Asset Management)
 > **目標**：建立可被交易的「物品」（如 BTC, Stock）。
 
-- [ ] **`feat/05-asset-crud`**
+- [ ] **`feat/03-asset-crud`**
     - [ ] **DB**: 定義 `Asset` Model (table: `assets`)，包含 `type` Check Constraint。
     - [ ] **Backend**: 實作 `GET /assets` (列表) 與 `POST /assets` (新增) API。
     - [ ] **Data**: 撰寫種子資料腳本 (Seed Data)，預設寫入：USD, TWD, BTC, ETH, AAPL, TSLA, VTI, VOO。
     - [ ] **Frontend**: Assets頁面微調、接API，可新增Asset。
 
-### Phase 4: 帳戶與投資組合 (Structure)
+### Phase 3: 帳戶與投資組合 (Structure)
 > **目標**：建立資金的「容器」與邏輯視圖。
 
-- [ ] **`feat/06-account-manage`**
+- [ ] **`feat/04-account-manage`**
     - [ ] **DB**: 定義 `Account` Model (table: `accounts`)。
     - [ ] **Backend**: 實作 `CRUD` for Accounts API。
     - [ ] **Frontend**: Accounts頁面微調、接API，可CRUD Account，刪改要二次確認。
@@ -65,7 +44,7 @@
     - [ ] **Backend**: 實作 API：將 Account 加入/移出 Portfolio。
     - [ ] **Frontend**: 在投資組合頁面增加「關聯帳戶」的 UI 操作 (多選或開關)。
 
-### 📝 Phase 5: 交易與持倉核心 (Transactions & Positions)
+### Phase 4: 交易與持倉核心 (Transactions & Positions)
 > **目標**：系統核心邏輯。交易產生流水，流水驅動庫存變化。
 
 - [ ] **`feat/09-transaction-log`**
@@ -78,7 +57,7 @@
     - [ ] **Backend API**: 實作 `GET /accounts/{id}/positions` (查詢某帳戶持倉)。
     - [ ] **Frontend**: 在帳戶詳情頁顯示「當前持倉列表」。
 
-### 📈 Phase 6: 市場數據與儀表板 (Analytics)
+### Phase 5: 市場數據與儀表板 (Analytics)
 > **目標**：讓數據「活」起來，計算市值與損益。
 
 - [ ] **`feat/11-market-data-schema`**
@@ -135,13 +114,15 @@
     * **ORM / DB Toolkit:** SQLModel (Pydantic + SQLAlchemy)
     * **Environment:** Docker & Docker Compose
 * **前端 (Frontend):**
-    * **Framework:** Vue.js (v3)
-    * **Build Tool:** Vite
-    * **UI Framework:** Vuetify 3
-    * **State Management:** Pinia
-    * **API Client:** Axios
+   * **Framework**: React
+   * **Language**: TypeScript
+   * **Build Tool**: Vite
+   * **UI Framework**: Tailwind CSS
+   * **State Management**: React Hooks
+   * **Charting**: Recharts
+   * **API Client**: Fetch API (Native)
 * **資料庫 (Database):**
-    * PostgreSQL 18
+    * SQLite
 
 ---
 

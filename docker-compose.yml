@@ -10,12 +10,9 @@ services:
       - "8000:8000"
     volumes:
       - .:/workspace
+      - ./sqlite_data:/data
     working_dir: /workspace/backend
     command: fastapi run main.py
-    environment:
-      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db/${DB_NAME}
-    depends_on:
-      - db
 
   frontend:
     build:
@@ -29,13 +26,3 @@ services:
       - /workspace/frontend/node_modules # 防止本機 node_modules 覆蓋容器的
     working_dir: /workspace/frontend
     command: npm run dev -- --host
-    
-  db:
-    image: postgres:18
-    container_name: profitfolio_db
-    environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
-    ports:
-      - "5432:5432"

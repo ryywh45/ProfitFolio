@@ -1,0 +1,5 @@
+{
+  "name": "ProfitFolio",
+  "description": "A professional investment portfolio tracker featuring a multi-view hosting model for accounts and portfolios.",
+  "requestFramePermissions": []
+}
