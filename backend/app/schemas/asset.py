@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
@@ -21,6 +22,7 @@ class AssetCreate(AssetBase):
 class AssetRead(AssetBase):
     id: int
     current_price: Decimal
+    last_updated: datetime
     
 
 # Properties to receive on item update

@@ -1,4 +1,5 @@
 from typing import Annotated
+from datetime import datetime, timezone, timedelta
 from fastapi import Depends
 from sqlmodel import Session, select
 
@@ -27,6 +28,7 @@ class AssetService:
 
     def update_asset(self, asset: Asset, asset_in: AssetUpdate) -> Asset:
         asset_data = asset_in.model_dump(exclude_unset=True)
+        asset_data['last_updated'] = datetime.now(timezone(timedelta(hours=8)))
         asset.sqlmodel_update(asset_data)
         self.session.add(asset)
         self.session.commit()

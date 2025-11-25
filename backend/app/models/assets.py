@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from enum import Enum
 from sqlmodel import SQLModel, Field, UniqueConstraint, Index
@@ -19,7 +19,7 @@ class Asset(SQLModel, table=True):
     type: AssetType = Field(nullable=False)
     
     current_price: Decimal = Field(default=0, max_digits=20, decimal_places=10)
-    last_updated: datetime = Field(default_factory=lambda: datetime.now())
+    last_updated: datetime = Field(default_factory=lambda: datetime.now(timezone(timedelta(hours=8))))
 
 # class MarketData(SQLModel, table=True):
 #     __tablename__ = "market_data"
