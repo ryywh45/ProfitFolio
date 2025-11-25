@@ -17,11 +17,11 @@
 ### Phase 2: 資產標的管理 (Asset Management)
 > **目標**：建立可被交易的「物品」（如 BTC, Stock）。
 
-- [ ] **`feat/03-asset-crud`**
+- [X] **`feat/03-asset-crud`**
     - [x] **DB**: 定義 `Asset` Model (table: `assets`)，包含 `type` Check Constraint。
     - [x] **Backend**: 實作 `GET /assets` (列表) 與 `POST /assets` (新增) API。
-    - [ ] **Data**: 撰寫種子資料腳本 (Seed Data)，預設寫入：USD, TWD, BTC, ETH, AAPL, TSLA, VTI, VOO。
-    - [ ] **Frontend**: Assets頁面微調、接API，可新增Asset。
+    <!-- - [ ] **Data**: 撰寫腳本預設寫入：USD, TWD, BTC, ETH, AAPL, TSLA, VTI, VOO。 -->
+    - [x] **Frontend**: Assets頁面微調、接API，可新增Asset。
 
 ### Phase 3: 帳戶與投資組合 (Structure)
 > **目標**：建立資金的「容器」與邏輯視圖。

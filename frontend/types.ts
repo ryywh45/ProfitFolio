@@ -8,7 +8,8 @@ export enum AssetType {
     STOCK = 'Stock',
     ETF = 'ETF',
     CRYPTO = 'Crypto',
-    CASH = 'Cash'
+    CASH = 'Cash',
+    FIAT = 'Fiat' // Added based on OpenAPI schema
 }
 
 export enum TransactionType {
@@ -67,4 +68,18 @@ export interface Asset {
     type: AssetType;
     currentPrice: number;
     lastUpdated: string;
+}
+
+// DTOs for API Requests based on OpenAPI
+export interface AssetCreateRequest {
+    ticker: string;
+    name: string;
+    type: string; // Lowercase for API: 'crypto', 'stock', etc.
+}
+
+export interface AssetUpdateRequest {
+    ticker?: string;
+    name?: string;
+    type?: string;
+    current_price?: number; // Snake case for API
 }
