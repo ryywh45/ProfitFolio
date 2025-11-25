@@ -19,7 +19,7 @@
 
 - [X] **`feat/03-asset-crud`**
     - [x] **DB**: 定義 `Asset` Model (table: `assets`)，包含 `type` Check Constraint。
-    - [x] **Backend**: 實作 `GET /assets` (列表) 與 `POST /assets` (新增) API。
+    - [x] **Backend**: 實作 `CRUD` for Assets API。
     <!-- - [ ] **Data**: 撰寫腳本預設寫入：USD, TWD, BTC, ETH, AAPL, TSLA, VTI, VOO。 -->
     - [x] **Frontend**: Assets頁面微調、接API，可新增Asset。
 
