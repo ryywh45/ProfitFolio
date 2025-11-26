@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { AssetType, Asset } from '../types';
+import { AssetType, Asset, Currency } from '../types';
 import { fetchAssets, createAsset, updateAsset, deleteAsset } from '../services/api';
 
 export const Assets: React.FC = () => {
@@ -14,6 +14,7 @@ export const Assets: React.FC = () => {
         ticker: '',
         name: '',
         type: AssetType.STOCK,
+        currency: Currency.USD,
         currentPrice: '' // Only for edit display/update if needed
     });
 
@@ -30,7 +31,7 @@ export const Assets: React.FC = () => {
 
     const handleOpenCreate = () => {
         setEditingAsset(null);
-        setFormData({ ticker: '', name: '', type: AssetType.STOCK, currentPrice: '' });
+        setFormData({ ticker: '', name: '', type: AssetType.STOCK, currency: Currency.USD, currentPrice: '' });
         setIsModalOpen(true);
     };
 
@@ -40,6 +41,7 @@ export const Assets: React.FC = () => {
             ticker: asset.ticker,
             name: asset.name,
             type: asset.type,
+            currency: asset.currency,
             currentPrice: asset.currentPrice.toString()
         });
         setIsModalOpen(true);
@@ -66,6 +68,7 @@ export const Assets: React.FC = () => {
                     ticker: formData.ticker,
                     name: formData.name,
                     type: formData.type,
+                    currency: formData.currency,
                     // If user edited price, send it, otherwise undefined
                     currentPrice: formData.currentPrice ? parseFloat(formData.currentPrice) : undefined
                 });
@@ -74,7 +77,8 @@ export const Assets: React.FC = () => {
                 await createAsset({
                     ticker: formData.ticker,
                     name: formData.name,
-                    type: formData.type
+                    type: formData.type,
+                    currency: formData.currency
                 });
             }
             setIsModalOpen(false);
@@ -85,8 +89,8 @@ export const Assets: React.FC = () => {
         }
     };
 
-    const formatCurrency = (val: number) => {
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
+    const formatCurrency = (val: number, curr: Currency) => {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: curr }).format(val);
     };
 
     const getBadgeStyles = (type: AssetType) => {
@@ -115,11 +119,12 @@ export const Assets: React.FC = () => {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-border-dark">
-                                <th className="py-4 px-6 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">代號</th>
-                                <th className="py-4 px-6 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">名稱</th>
-                                <th className="py-4 px-6 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">類型</th>
-                                <th className="py-4 px-6 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">當前價格</th>
-                                <th className="py-4 px-6 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">更新時間</th>
+                                <th className="py-4 px-6 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ticker</th>
+                                <th className="py-4 px-6 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
+                                <th className="py-4 px-6 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
+                                <th className="py-4 px-6 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">幣別</th>
+                                <th className="py-4 px-6 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Current Price</th>
+                                <th className="py-4 px-6 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Last Updated</th>
                                 <th className="py-4 px-6 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">操作</th>
                             </tr>
                         </thead>
@@ -131,6 +136,7 @@ export const Assets: React.FC = () => {
                                         <td className="py-4 px-6"><div className="h-4 bg-gray-200 dark:bg-white/10 rounded w-12"></div></td>
                                         <td className="py-4 px-6"><div className="h-4 bg-gray-200 dark:bg-white/10 rounded w-32"></div></td>
                                         <td className="py-4 px-6"><div className="h-5 bg-gray-200 dark:bg-white/10 rounded-full w-16"></div></td>
+                                        <td className="py-4 px-6"><div className="h-4 bg-gray-200 dark:bg-white/10 rounded w-10"></div></td>
                                         <td className="py-4 px-6 text-right"><div className="h-4 bg-gray-200 dark:bg-white/10 rounded w-20 ml-auto"></div></td>
                                         <td className="py-4 px-6"><div className="h-4 bg-gray-200 dark:bg-white/10 rounded w-24"></div></td>
                                         <td className="py-4 px-6">
@@ -152,8 +158,9 @@ export const Assets: React.FC = () => {
                                                 {asset.type}
                                             </span>
                                         </td>
+                                        <td className="py-4 px-6 text-sm text-gray-600 dark:text-gray-300 font-medium">{asset.currency}</td>
                                         <td className="py-4 px-6 text-sm font-bold text-gray-900 dark:text-white text-right font-mono">
-                                            {formatCurrency(asset.currentPrice)}
+                                            {formatCurrency(asset.currentPrice, asset.currency)}
                                         </td>
                                         <td className="py-4 px-6 text-sm text-gray-500 dark:text-gray-400">
                                             {asset.lastUpdated}
@@ -223,17 +230,30 @@ export const Assets: React.FC = () => {
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
-                                <select 
-                                    value={formData.type}
-                                    onChange={e => setFormData({...formData, type: e.target.value as AssetType})}
-                                    className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-300 dark:border-border-dark rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary outline-none"
-                                >
-                                    {Object.values(AssetType).map(type => (
-                                        <option key={type} value={type}>{type}</option>
-                                    ))}
-                                </select>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
+                                    <select 
+                                        value={formData.type}
+                                        onChange={e => setFormData({...formData, type: e.target.value as AssetType})}
+                                        className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-300 dark:border-border-dark rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary outline-none"
+                                    >
+                                        {Object.values(AssetType).map(type => (
+                                            <option key={type} value={type}>{type}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Currency</label>
+                                    <select 
+                                        value={formData.currency}
+                                        onChange={e => setFormData({...formData, currency: e.target.value as Currency})}
+                                        className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-300 dark:border-border-dark rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary outline-none"
+                                    >
+                                        <option value={Currency.USD}>USD</option>
+                                        <option value={Currency.TWD}>TWD</option>
+                                    </select>
+                                </div>
                             </div>
 
                             {/* Only show price editing if updating, creating usually fetches price automatically */}

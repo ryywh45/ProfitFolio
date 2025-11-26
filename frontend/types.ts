@@ -66,6 +66,7 @@ export interface Asset {
     ticker: string;
     name: string;
     type: AssetType;
+    currency: Currency;
     currentPrice: number;
     lastUpdated: string;
 }
@@ -75,12 +76,14 @@ export interface AssetCreateRequest {
     ticker: string;
     name: string;
     type: string; // Lowercase for API: 'crypto', 'stock', etc.
+    currency?: string;
 }
 
 export interface AssetUpdateRequest {
     ticker?: string;
     name?: string;
     type?: string;
+    currency?: string;
     current_price?: number; // Snake case for API
 }
 

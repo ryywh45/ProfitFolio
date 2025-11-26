@@ -11,6 +11,7 @@ interface AssetResponse {
     ticker: string;
     name: string;
     type: 'crypto' | 'stock' | 'etf' | 'fiat';
+    currency: string;
     current_price: string; // Backend returns string decimal
     last_updated: string;
 }
@@ -73,6 +74,7 @@ export const fetchAssets = async (): Promise<Asset[]> => {
             ticker: item.ticker,
             name: item.name,
             type: mapApiTypeToFrontend(item.type),
+            currency: mapCurrencyToFrontend(item.currency),
             currentPrice: parseFloat(item.current_price),
             lastUpdated: new Date(item.last_updated).toLocaleString() // Simple format
         }));
@@ -87,11 +89,12 @@ export const fetchAssets = async (): Promise<Asset[]> => {
  * POST /api/v1/assets/
  * Create Asset
  */
-export const createAsset = async (asset: { ticker: string; name: string; type: AssetType }): Promise<Asset> => {
+export const createAsset = async (asset: { ticker: string; name: string; type: AssetType; currency: Currency }): Promise<Asset> => {
     const payload: AssetCreateRequest = {
         ticker: asset.ticker,
         name: asset.name,
-        type: mapFrontendTypeToApi(asset.type)
+        type: mapFrontendTypeToApi(asset.type),
+        currency: asset.currency
     };
 
     const response = await fetch(`${API_BASE_URL}/api/v1/assets/`, {
@@ -111,6 +114,7 @@ export const createAsset = async (asset: { ticker: string; name: string; type: A
         ticker: item.ticker,
         name: item.name,
         type: mapApiTypeToFrontend(item.type),
+        currency: mapCurrencyToFrontend(item.currency),
         currentPrice: parseFloat(item.current_price),
         lastUpdated: new Date(item.last_updated).toLocaleString()
     };
@@ -120,11 +124,12 @@ export const createAsset = async (asset: { ticker: string; name: string; type: A
  * PATCH /api/v1/assets/{id}
  * Update Asset
  */
-export const updateAsset = async (id: string, updates: { ticker?: string; name?: string; type?: AssetType; currentPrice?: number }): Promise<Asset> => {
+export const updateAsset = async (id: string, updates: { ticker?: string; name?: string; type?: AssetType; currency?: Currency; currentPrice?: number }): Promise<Asset> => {
     const payload: AssetUpdateRequest = {};
     if (updates.ticker) payload.ticker = updates.ticker;
     if (updates.name) payload.name = updates.name;
     if (updates.type) payload.type = mapFrontendTypeToApi(updates.type);
+    if (updates.currency) payload.currency = updates.currency;
     if (updates.currentPrice !== undefined) payload.current_price = updates.currentPrice;
 
     const response = await fetch(`${API_BASE_URL}/api/v1/assets/${id}`, {
@@ -141,6 +146,7 @@ export const updateAsset = async (id: string, updates: { ticker?: string; name?:
         ticker: item.ticker,
         name: item.name,
         type: mapApiTypeToFrontend(item.type),
+        currency: mapCurrencyToFrontend(item.currency),
         currentPrice: parseFloat(item.current_price),
         lastUpdated: new Date(item.last_updated).toLocaleString()
     };

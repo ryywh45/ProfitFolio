@@ -17,6 +17,7 @@ class Asset(SQLModel, table=True):
     ticker: str = Field(max_length=20, unique=True, nullable=False)
     name: str = Field(max_length=100, nullable=False)
     type: AssetType = Field(nullable=False)
+    currency: str = Field(default="USD", max_length=10, nullable=False)
     
     current_price: Decimal = Field(default=0, max_digits=20, decimal_places=10)
     last_updated: datetime = Field(default_factory=lambda: datetime.now(timezone(timedelta(hours=8))))

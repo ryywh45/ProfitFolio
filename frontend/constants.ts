@@ -58,10 +58,10 @@ export const ACCOUNTS_DATA: Account[] = [
 ];
 
 export const ASSETS_DATA: Asset[] = [
-    { id: '1', ticker: 'BTC', name: 'Bitcoin', type: AssetType.CRYPTO, currentPrice: 65432.10, lastUpdated: '2 mins ago' },
-    { id: '2', ticker: 'ETH', name: 'Ethereum', type: AssetType.CRYPTO, currentPrice: 3456.78, lastUpdated: '2 mins ago' },
-    { id: '3', ticker: 'AAPL', name: 'Apple Inc.', type: AssetType.STOCK, currentPrice: 195.89, lastUpdated: '15 mins ago' },
-    { id: '4', ticker: 'TSLA', name: 'Tesla, Inc.', type: AssetType.STOCK, currentPrice: 182.01, lastUpdated: '15 mins ago' },
-    { id: '5', ticker: 'NVDA', name: 'NVIDIA Corporation', type: AssetType.STOCK, currentPrice: 120.90, lastUpdated: '15 mins ago' },
-    { id: '6', ticker: 'VTI', name: 'Vanguard Total Stock Market ETF', type: AssetType.ETF, currentPrice: 263.45, lastUpdated: '15 mins ago' },
+    { id: '1', ticker: 'BTC', name: 'Bitcoin', type: AssetType.CRYPTO, currency: Currency.USD, currentPrice: 65432.10, lastUpdated: '2 mins ago' },
+    { id: '2', ticker: 'ETH', name: 'Ethereum', type: AssetType.CRYPTO, currency: Currency.USD, currentPrice: 3456.78, lastUpdated: '2 mins ago' },
+    { id: '3', ticker: 'AAPL', name: 'Apple Inc.', type: AssetType.STOCK, currency: Currency.USD, currentPrice: 195.89, lastUpdated: '15 mins ago' },
+    { id: '4', ticker: 'TSLA', name: 'Tesla, Inc.', type: AssetType.STOCK, currency: Currency.USD, currentPrice: 182.01, lastUpdated: '15 mins ago' },
+    { id: '5', ticker: 'NVDA', name: 'NVIDIA Corporation', type: AssetType.STOCK, currency: Currency.USD, currentPrice: 120.90, lastUpdated: '15 mins ago' },
+    { id: '6', ticker: 'VTI', name: 'Vanguard Total Stock Market ETF', type: AssetType.ETF, currency: Currency.USD, currentPrice: 263.45, lastUpdated: '15 mins ago' },
 ];

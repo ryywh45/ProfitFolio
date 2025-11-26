@@ -11,6 +11,7 @@ class AssetBase(SQLModel):
     ticker: str
     name: str
     type: AssetType
+    currency: str = "USD"
 
 
 # Properties to receive on item creation
@@ -30,4 +31,5 @@ class AssetUpdate(SQLModel):
     ticker: Optional[str] = None
     name: Optional[str] = None
     type: Optional[AssetType] = None
+    currency: Optional[str] = None
     current_price: Optional[Decimal] = None
