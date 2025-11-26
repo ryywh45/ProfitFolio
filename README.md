@@ -22,6 +22,11 @@
     - [x] **Backend**: 實作 `CRUD` for Assets API。
     <!-- - [ ] **Data**: 撰寫腳本預設寫入：USD, TWD, BTC, ETH, AAPL, TSLA, VTI, VOO。 -->
     - [x] **Frontend**: Assets頁面微調、接API，可新增Asset。
+    > 缺少幣別，需要新增資料表欄位  
+    > 日後在新增交易的時候要確保account, asset的幣別相同
+    - [ ] **DB**: model新增currency欄位
+    - [ ] **backend**: API, schema相應修改
+    - [ ] **frontend**: table新增欄位, 接API
 
 ### Phase 3: 帳戶與投資組合 (Structure)
 > **目標**：建立資金的「容器」與邏輯視圖。
