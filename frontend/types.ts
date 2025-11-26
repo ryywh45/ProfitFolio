@@ -83,3 +83,13 @@ export interface AssetUpdateRequest {
     type?: string;
     current_price?: number; // Snake case for API
 }
+
+export interface AccountCreateRequest {
+    name: string;
+    currency?: string;
+}
+
+export interface AccountUpdateRequest {
+    name?: string;
+    currency?: string;
+}

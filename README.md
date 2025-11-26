@@ -27,9 +27,13 @@
 > **目標**：建立資金的「容器」與邏輯視圖。
 
 - [ ] **`feat/04-account-manage`**
-    - [ ] **DB**: 定義 `Account` Model (table: `accounts`)。
-    - [ ] **Backend**: 實作 `CRUD` for Accounts API。
-    - [ ] **Frontend**: Accounts頁面微調、接API，可CRUD Account，刪改要二次確認。
+    - [x] **DB**: 定義 `Account` Model (table: `accounts`)。
+    - [x] **Backend**: 實作 `CRUD` for Accounts API。
+    - [x] **Frontend**: Accounts頁面微調、接API，可CRUD Account，刪除要二次確認。
+    > 目前Accounts頁面還沒有"目前餘額"，要等Transaction功能及Positons表完成  
+    > 完成後進行以下動作:
+    - [ ] **Backend**: 實作`GET /api/v1/Account`回傳Accounts頁面整個table的資料，目前餘額欄位查Position表。
+    - [ ] **Frontend**: 改接新的API`GET /api/v1/Account`
 
 ---
 ### (以下內容未完成)

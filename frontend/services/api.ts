@@ -1,5 +1,5 @@
 
-import { Asset, Account, AssetType, AssetCreateRequest, AssetUpdateRequest } from '../types';
+import { Asset, Account, AssetType, AssetCreateRequest, AssetUpdateRequest, Currency, AccountCreateRequest, AccountUpdateRequest } from '../types';
 import { ASSETS_DATA, ACCOUNTS_DATA } from '../constants';
 
 // Configuration
@@ -13,6 +13,13 @@ interface AssetResponse {
     type: 'crypto' | 'stock' | 'etf' | 'fiat';
     current_price: string; // Backend returns string decimal
     last_updated: string;
+}
+
+interface AccountResponse {
+    id: number;
+    name: string;
+    currency: string;
+    created_at: string;
 }
 
 export type AccountsApiResponse = Account[];
@@ -36,6 +43,11 @@ const mapFrontendTypeToApi = (feType: AssetType): string => {
         case AssetType.FIAT: return 'fiat';
         default: return 'stock';
     }
+};
+
+const mapCurrencyToFrontend = (curr: string): Currency => {
+    if (curr === 'TWD') return Currency.TWD;
+    return Currency.USD;
 };
 
 /**
@@ -147,16 +159,103 @@ export const deleteAsset = async (id: string): Promise<void> => {
 };
 
 /**
- * GET /v1/accounts (Kept as mock fallback structure for now or future implementation)
+ * GET /api/v1/accounts/
+ * Read Accounts
  */
 export const fetchAccounts = async (): Promise<Account[]> => {
     try {
-        // Attempting to hit the same base URL structure if accounts API existed
-        // const response = await fetch(`${API_BASE_URL}/api/v1/accounts/`);
-        // For now, force fallback since only assets API is defined in prompt
-        throw new Error("Accounts API not implemented yet");
+        const response = await fetch(`${API_BASE_URL}/api/v1/accounts/?limit=100`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (!response.ok) {
+            throw new Error(`API Error: ${response.status}`);
+        }
+
+        const data: AccountResponse[] = await response.json();
+
+        return data.map(item => ({
+            id: item.id.toString(),
+            name: item.name,
+            currency: mapCurrencyToFrontend(item.currency),
+            // Note: API spec for AccountRead does NOT return balance. Defaulting to 0.
+            balance: 0, 
+            lastUpdated: new Date(item.created_at).toLocaleString() // Mapping created_at to lastUpdated for now
+        }));
+
     } catch (error) {
-        // console.warn("Using mock data for accounts");
+        console.warn("Failed to fetch accounts from API, falling back to mock data.", error);
         return new Promise((resolve) => setTimeout(() => resolve(ACCOUNTS_DATA), 600));
     }
+};
+
+/**
+ * POST /api/v1/accounts/
+ * Create Account
+ */
+export const createAccount = async (account: { name: string; currency: Currency }): Promise<Account> => {
+    const payload: AccountCreateRequest = {
+        name: account.name,
+        currency: account.currency
+    };
+
+    const response = await fetch(`${API_BASE_URL}/api/v1/accounts/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.detail ? JSON.stringify(err.detail) : 'Failed to create account');
+    }
+
+    const item: AccountResponse = await response.json();
+    return {
+        id: item.id.toString(),
+        name: item.name,
+        currency: mapCurrencyToFrontend(item.currency),
+        balance: 0,
+        lastUpdated: new Date(item.created_at).toLocaleString()
+    };
+};
+
+/**
+ * PATCH /api/v1/accounts/{id}
+ * Update Account
+ */
+export const updateAccount = async (id: string, updates: { name?: string; currency?: Currency }): Promise<Account> => {
+    const payload: AccountUpdateRequest = {};
+    if (updates.name) payload.name = updates.name;
+    if (updates.currency) payload.currency = updates.currency;
+
+    const response = await fetch(`${API_BASE_URL}/api/v1/accounts/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) throw new Error('Failed to update account');
+
+    const item: AccountResponse = await response.json();
+    return {
+        id: item.id.toString(),
+        name: item.name,
+        currency: mapCurrencyToFrontend(item.currency),
+        balance: 0,
+        lastUpdated: new Date(item.created_at).toLocaleString()
+    };
+};
+
+/**
+ * DELETE /api/v1/accounts/{id}
+ * Delete Account
+ */
+export const deleteAccount = async (id: string): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/api/v1/accounts/${id}`, {
+        method: 'DELETE',
+    });
+
+    if (!response.ok) throw new Error('Failed to delete account');
 };
