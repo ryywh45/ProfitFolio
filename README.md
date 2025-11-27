@@ -57,12 +57,12 @@ docker-compose up
 ---
 
 - [ ] **`feat/07-portfolio-core`**
-    - [ ] **DB**: 定義 `Portfolio` Model (table: `portfolios`)。
-    - [ ] **Backend**: 實作 `CRUD` for Portfolios API。
+    - [x] **DB**: 定義 `Portfolio` Model (table: `portfolios`)。
+    - [x] **Backend**: 實作 `CRUD` for Portfolios API。
     - [ ] **Frontend**: 製作「投資組合管理頁」，可新增/編輯組合 (如 "退休規劃")。
 - [ ] **`feat/08-portfolio-relation`**
-    - [ ] **DB**: 定義 `PortfolioAccount` Link Model (table: `portfolio_accounts`)。
-    - [ ] **Backend**: 實作 API：將 Account 加入/移出 Portfolio。
+    - [x] **DB**: 定義 `PortfolioAccount` Link Model (table: `portfolio_accounts`)。
+    - [x] **Backend**: 實作 API：將 Account 加入/移出 Portfolio。
     - [ ] **Frontend**: 在投資組合頁面增加「關聯帳戶」的 UI 操作 (多選或開關)。
 
 ### Phase 4: 交易與持倉核心 (Transactions & Positions)
