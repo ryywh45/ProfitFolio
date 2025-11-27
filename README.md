@@ -1,5 +1,17 @@
 # ProfitFolio
 
+## Development
+0. 裝git, docker
+1. git clone, 創自己的branch
+2. 
+```
+docker-compose build
+```
+3. 
+```
+docker-compose up
+```
+
 ## Roadmap
 
 ### Phase 1: 專案基建 (Infrastructure Initialization)
