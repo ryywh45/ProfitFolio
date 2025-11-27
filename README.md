@@ -69,12 +69,12 @@ docker-compose up
 > **目標**：系統核心邏輯。交易產生流水，流水驅動庫存變化。
 
 - [ ] **`feat/09-transaction-log`**
-    - [ ] **DB**: 定義 `Transaction` Model (table: `transactions`)。
-    - [ ] **Backend**: 實作 `POST /transactions` API (記帳)。
+    - [x] **DB**: 定義 `Transaction` Model (table: `transactions`)。
+    - [x] **Backend**: 實作 `POST /transactions` API (記帳)。
     - [ ] **Frontend**: 製作「新增交易 Dialog」，表單包含：日期、帳戶、資產、類型(Buy/Sell)、數量、價格。
 - [ ] **`feat/10-position-calculation`**
-    - [ ] **DB**: 定義 `Position` Model (table: `positions`)。
-    - [ ] **Backend Logic**: 實作 Signal 或 Service function，在 Transaction 寫入時自動更新 Position (加減數量、計算平均成本)。
+    - [x] **DB**: 定義 `Position` Model (table: `positions`)。
+    - [x] **Backend Logic**: 實作 Signal 或 Service function，在 Transaction 寫入時自動更新 Position (加減數量、計算平均成本)。
     - [ ] **Backend API**: 實作 `GET /accounts/{id}/positions` (查詢某帳戶持倉)。
     - [ ] **Frontend**: 在帳戶詳情頁顯示「當前持倉列表」。
 

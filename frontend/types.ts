@@ -1,4 +1,3 @@
-
 export enum Currency {
     USD = 'USD',
     TWD = 'TWD'
@@ -22,15 +21,17 @@ export enum TransactionType {
 
 export interface Transaction {
     id: string;
-    date: string;
+    date: string; // mapped from transaction_time
+    accountId: string;
     accountName: string;
     type: TransactionType;
-    assetSymbol: string;
+    assetId?: string;
+    assetSymbol?: string; // mapped from asset_name/ticker
     quantity: number | null;
     pricePerUnit: number | null;
-    amount: number; // Total value
+    amount: number; // Calculated: quantity * pricePerUnit
     fee: number;
-    currency: Currency;
+    notes?: string;
 }
 
 export interface AssetAllocation {
@@ -94,6 +95,7 @@ export interface ConnectedAccount {
 }
 
 // DTOs for API Requests based on OpenAPI
+
 export interface AssetCreateRequest {
     ticker: string;
     name: string;
@@ -117,4 +119,26 @@ export interface AccountCreateRequest {
 export interface AccountUpdateRequest {
     name?: string;
     currency?: string;
+}
+
+export interface TransactionCreateRequest {
+    account_id: number;
+    asset_id?: number | null;
+    type: string;
+    quantity?: number | null;
+    price_per_unit?: number | null;
+    fee?: number;
+    transaction_time?: string;
+    notes?: string;
+}
+
+export interface TransactionUpdateRequest {
+    account_id?: number;
+    asset_id?: number | null;
+    type?: string;
+    quantity?: number | null;
+    price_per_unit?: number | null;
+    fee?: number;
+    transaction_time?: string;
+    notes?: string;
 }
