@@ -2,7 +2,11 @@
 import React from 'react';
 import { PORTFOLIOS_DATA } from '../constants';
 
-export const Portfolios: React.FC = () => {
+interface PortfoliosProps {
+    onViewDetails: (id: string) => void;
+}
+
+export const Portfolios: React.FC<PortfoliosProps> = ({ onViewDetails }) => {
     const formatCurrency = (val: number) => {
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
     };
@@ -43,7 +47,10 @@ export const Portfolios: React.FC = () => {
                                 </div>
                             </div>
 
-                            <button className="mt-auto w-full flex items-center justify-center rounded-lg h-10 px-4 bg-primary/10 dark:bg-primary/10 text-green-700 dark:text-primary text-sm font-bold hover:bg-primary/20 dark:hover:bg-primary/20 transition-colors">
+                            <button 
+                                onClick={() => onViewDetails(portfolio.id)}
+                                className="mt-auto w-full flex items-center justify-center rounded-lg h-10 px-4 bg-primary/10 dark:bg-primary/10 text-green-700 dark:text-primary text-sm font-bold hover:bg-primary/20 dark:hover:bg-primary/20 transition-colors"
+                            >
                                 View Details
                             </button>
                         </div>

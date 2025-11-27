@@ -4,6 +4,7 @@ import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { Dashboard } from './components/Dashboard';
 import { Portfolios } from './components/Portfolios';
+import { PortfolioDetails } from './components/PortfolioDetails';
 import { Accounts } from './components/Accounts';
 import { Transactions } from './components/Transactions';
 import { Assets } from './components/Assets';
@@ -15,6 +16,7 @@ const App: React.FC = () => {
     const [activeTab, setActiveTab] = useState<string>('dashboard');
     const [currency, setCurrency] = useState<Currency>(Currency.USD);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
+    const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null);
 
     // Initial Theme Setup
     useEffect(() => {
@@ -33,6 +35,12 @@ const App: React.FC = () => {
         setIsSidebarCollapsed(!isSidebarCollapsed);
     };
 
+    // Reset portfolio selection when changing tabs
+    const handleTabChange = (tabId: string) => {
+        setActiveTab(tabId);
+        setSelectedPortfolioId(null);
+    };
+
     const getTitle = () => {
         const item = MENU_ITEMS.find(i => i.id === activeTab);
         return item ? item.label : 'Dashboard';
@@ -44,7 +52,11 @@ const App: React.FC = () => {
             case 'dashboard':
                 return <Dashboard />;
             case 'portfolios':
-                return <Portfolios />;
+                if (selectedPortfolioId) {
+                    // Render Detail View without Header since Detail View has its own breadcrumb header
+                    return <PortfolioDetails onBack={() => setSelectedPortfolioId(null)} />;
+                }
+                return <Portfolios onViewDetails={(id) => setSelectedPortfolioId(id)} />;
             case 'accounts':
                 return <Accounts />;
             case 'transactions':
@@ -67,24 +79,26 @@ const App: React.FC = () => {
             {/* Navigation Drawer */}
             <Sidebar 
                 activeTab={activeTab} 
-                onTabChange={setActiveTab} 
+                onTabChange={handleTabChange} 
                 isCollapsed={isSidebarCollapsed}
             />
 
             {/* Main Content Area */}
             <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
-                {/* App Bar */}
-                <Header 
-                    toggleTheme={toggleTheme} 
-                    isDark={darkMode} 
-                    title={getTitle()}
-                    currentCurrency={currency}
-                    setCurrency={setCurrency}
-                    toggleSidebar={toggleSidebar}
-                />
+                {/* App Bar - Only show if NOT in Portfolio Details view (as it has its own header) */}
+                {!(activeTab === 'portfolios' && selectedPortfolioId) && (
+                    <Header 
+                        toggleTheme={toggleTheme} 
+                        isDark={darkMode} 
+                        title={getTitle()}
+                        currentCurrency={currency}
+                        setCurrency={setCurrency}
+                        toggleSidebar={toggleSidebar}
+                    />
+                )}
 
                 {/* Scrollable View */}
-                <div className="flex-1 overflow-y-auto">
+                <div className="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark">
                     {renderContent()}
                 </div>
             </main>

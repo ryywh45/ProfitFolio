@@ -1,5 +1,5 @@
 
-import { AssetAllocation, AssetType, MenuItem, Transaction, TransactionType, Currency, Portfolio, Account, Asset } from './types';
+import { AssetAllocation, AssetType, MenuItem, Transaction, TransactionType, Currency, Portfolio, Account, Asset, Holding, ConnectedAccount } from './types';
 
 export const MENU_ITEMS: MenuItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -65,3 +65,25 @@ export const ASSETS_DATA: Asset[] = [
     { id: '5', ticker: 'NVDA', name: 'NVIDIA Corporation', type: AssetType.STOCK, currency: Currency.USD, currentPrice: 120.90, lastUpdated: '15 mins ago' },
     { id: '6', ticker: 'VTI', name: 'Vanguard Total Stock Market ETF', type: AssetType.ETF, currency: Currency.USD, currentPrice: 263.45, lastUpdated: '15 mins ago' },
 ];
+
+// Mock Data for "Portfolio Details" view (matches screen.png provided by user)
+export const PORTFOLIO_DETAILS_MOCK = {
+    id: '1',
+    name: '退休基金',
+    totalValue: 125430.50,
+    totalProfit: 12830.15,
+    totalProfitPercent: 11.39,
+    dailyChange: -280.15,
+    dailyChangePercent: -0.22,
+    holdings: [
+        { id: 'h1', ticker: 'VT', name: 'Vanguard Total World Stock ETF', currentPrice: 112.50, quantity: 500, averageCost: 98.00, marketValue: 56250.00, profit: 7250.00, profitPercent: 14.80, allocation: 44.84, color: '#3b82f6' }, // Blue
+        { id: 'h2', ticker: 'AAPL', name: 'Apple Inc.', currentPrice: 190.45, quantity: 100, averageCost: 150.20, marketValue: 19045.00, profit: 4025.00, profitPercent: 26.80, allocation: 15.18, color: '#ec4899' }, // Pink
+        { id: 'h3', ticker: 'NVDA', name: 'NVIDIA Corporation', currentPrice: 120.75, quantity: 150, averageCost: 95.50, marketValue: 18112.50, profit: 3787.50, profitPercent: 26.44, allocation: 14.44, color: '#eab308' }, // Yellow
+        { id: 'h4', ticker: 'BND', name: 'Vanguard Total Bond Market ETF', currentPrice: 73.20, quantity: 236, averageCost: 75.00, marketValue: 17282.20, profit: -424.80, profitPercent: -2.40, allocation: 13.78, color: '#14b8a6' }, // Teal
+        { id: 'h5', ticker: 'TSLA', name: 'Tesla, Inc.', currentPrice: 183.01, quantity: 80, averageCost: 250.00, marketValue: 14640.80, profit: -5359.20, profitPercent: -26.80, allocation: 11.67, color: '#a855f7' }, // Purple
+    ] as Holding[],
+    accounts: [
+        { id: 'a1', name: 'Firstrade Brokerage', type: 'Brokerage Account', balance: 85320.10 },
+        { id: 'a2', name: 'Fidelity 401(k)', type: 'Retirement Account', balance: 40110.40 },
+    ] as ConnectedAccount[]
+};

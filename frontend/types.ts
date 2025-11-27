@@ -71,6 +71,28 @@ export interface Asset {
     lastUpdated: string;
 }
 
+// Portfolio Details Types
+export interface Holding {
+    id: string;
+    ticker: string;
+    name: string;
+    currentPrice: number;
+    quantity: number;
+    averageCost: number;
+    marketValue: number;
+    profit: number;
+    profitPercent: number;
+    allocation: number; // 0-100
+    color: string; // For chart matching
+}
+
+export interface ConnectedAccount {
+    id: string;
+    name: string;
+    type: string;
+    balance: number;
+}
+
 // DTOs for API Requests based on OpenAPI
 export interface AssetCreateRequest {
     ticker: string;
