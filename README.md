@@ -12,6 +12,45 @@ docker-compose build
 docker-compose up
 ```
 
+## dev note
+- 先假設所有東西都是USD，都做完再支援多幣種
+- 關於多幣種的想法，先寫下來，但是最後再做
+
+### Assets頁面
+1. 缺少current price
+- 後端打yfinance api
+- 新增POST /api/v1/assets/refresh 來刷新價格，前端加按鈕
+- 後期用排程定時更新
+
+### Transaction頁面
+1. 金額單位要跟著Account
+- 前端顯示NT$, $這種要跟著Account的幣別
+- 前端新增/修改交易時 要提示幣別
+- 後端自動更新position的邏輯不用在意幣種 position表的幣種也是跟account
+
+### Account頁面
+1. 缺少目前餘額，下面有寫到，要去position表查
+- 思考要新增API還是修改現有的，目前傾向新增
+
+### Portfolio頁面
+1. 剛按進去的統整頁面要接API
+- 後端新增/api/v1/portfolio/summary
+(本來預計要summary by id，目前看來只要service寫summary single account的功能就好，不用開API)
+
+2. 投資組合詳細資料頁面也要接API
+- TODO 作法待研究，看是要一個/api/v1/portfolio/{id}/detail 還是有的資料可以拆開
+
+3. 新增投資組合按鈕要接API
+- 前端接POST /api/v1/portfolio 傳入list of account-id
+- 設計新增對話框
+
+4. 詳細資料頁面
+- TODO edit, manage account按鈕的功能 還沒想
+- top bar 要能收起測邊欄
+
+### Dashboard頁面
+TODO 作法待規劃
+
 ## Roadmap
 
 ### Phase 1: 專案基建 (Infrastructure Initialization)
