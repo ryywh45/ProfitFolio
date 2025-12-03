@@ -36,6 +36,15 @@ interface TransactionResponse {
     notes?: string;
 }
 
+export interface AssetValidateResponse {
+    ticker: string;
+    name: string;
+    currency: string;
+    current_price: string;
+    valid: boolean;
+    type?: 'crypto' | 'stock' | 'etf' | 'fiat' | null;
+}
+
 export type AccountsApiResponse = Account[];
 
 // Helpers for Enum Conversion
@@ -115,6 +124,39 @@ export const fetchAssets = async (): Promise<Asset[]> => {
     } catch (error) {
         console.warn("Failed to fetch assets from API, falling back to mock data.", error);
         return new Promise((resolve) => setTimeout(() => resolve(ASSETS_DATA), 500));
+    }
+};
+
+/**
+ * POST /api/v1/assets/validate
+ * Validate Asset Ticker
+ */
+export const validateAsset = async (ticker: string): Promise<AssetValidateResponse> => {
+    const response = await fetch(`${API_BASE_URL}/api/v1/assets/validate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticker })
+    });
+
+    if (!response.ok) {
+        throw new Error('Validation failed');
+    }
+
+    return await response.json();
+};
+
+/**
+ * POST /api/v1/assets/update_prices
+ * Update All Prices
+ */
+export const updateAllAssetPrices = async (): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/api/v1/assets/update_prices`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to update prices');
     }
 };
 

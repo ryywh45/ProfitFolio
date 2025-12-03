@@ -8,4 +8,5 @@ dependencies = [
     "fastapi[standard]>=0.121.2",
     "psycopg[binary]>=3.2.12",
     "sqlmodel>=0.0.27",
+    "yfinance>=0.2.66",
 ]

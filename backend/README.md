@@ -1,3 +1,10 @@
+### 更新依賴
+```
+uv export --format requirements.txt --output-file requirements.txt
+```
+然後重build容器
+
+### 目錄結構
 ```
 backend/
 ├── Dockerfile

@@ -2,11 +2,29 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query, HTTPException
 
 from app.services.asset import AssetService
-from app.schemas.asset import AssetCreate, AssetRead, AssetUpdate
+from app.schemas.asset import AssetCreate, AssetRead, AssetUpdate, AssetValidateRequest, AssetValidateResponse
 
 router = APIRouter()
 
 ServiceDep = Annotated[AssetService, Depends()]
+
+@router.post("/validate", response_model=AssetValidateResponse)
+def validate_asset_ticker(asset_service: ServiceDep, request: AssetValidateRequest):
+    """
+    Validate a ticker using yfinance and return metadata.
+    """
+    result = asset_service.validate_ticker(request.ticker)
+    if not result.valid:
+        raise HTTPException(status_code=404, detail=f"Ticker '{request.ticker}' not found or invalid.")
+    return result
+
+@router.post("/update_prices")
+def update_all_prices(asset_service: ServiceDep):
+    """
+    Update current prices for all assets.
+    """
+    count = asset_service.update_prices()
+    return {"ok": True, "updated_count": count}
 
 @router.post("/", response_model=AssetRead)
 def create_asset(asset_service: ServiceDep, asset_in: AssetCreate):

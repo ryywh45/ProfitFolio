@@ -24,7 +24,17 @@ class AssetRead(AssetBase):
     id: int
     current_price: Decimal
     last_updated: datetime
-    
+
+class AssetValidateRequest(SQLModel):
+    ticker: str
+
+class AssetValidateResponse(SQLModel):
+    ticker: str
+    name: str
+    currency: str
+    current_price: Decimal
+    valid: bool
+    type: Optional[AssetType] = None
 
 # Properties to receive on item update
 class AssetUpdate(SQLModel):

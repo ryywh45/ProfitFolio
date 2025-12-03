@@ -1,21 +1,27 @@
-
 import React, { useEffect, useState } from 'react';
 import { AssetType, Asset, Currency } from '../types';
-import { fetchAssets, createAsset, updateAsset, deleteAsset } from '../services/api';
+import { fetchAssets, createAsset, updateAsset, deleteAsset, validateAsset, updateAllAssetPrices } from '../services/api';
 
 export const Assets: React.FC = () => {
     const [assets, setAssets] = useState<Asset[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
+    
+    // Validation State for Create Mode
+    const [isValidating, setIsValidating] = useState(false);
+    const [hasValidated, setHasValidated] = useState(false);
+    const [validationError, setValidationError] = useState<string | null>(null);
+
     const [formData, setFormData] = useState({
         ticker: '',
         name: '',
         type: AssetType.STOCK,
         currency: Currency.USD,
-        currentPrice: '' // Only for edit display/update if needed
+        currentPrice: ''
     });
 
     const loadData = async () => {
@@ -29,14 +35,33 @@ export const Assets: React.FC = () => {
         loadData();
     }, []);
 
+    const handleRefreshPrices = async () => {
+        setIsRefreshing(true);
+        try {
+            await updateAllAssetPrices();
+            // Wait a moment for DB propagation if needed, then reload
+            await loadData();
+        } catch (error) {
+            console.error(error);
+            alert('Failed to update prices. Check backend connection.');
+        } finally {
+            setIsRefreshing(false);
+        }
+    };
+
     const handleOpenCreate = () => {
         setEditingAsset(null);
+        setHasValidated(false);
+        setValidationError(null);
         setFormData({ ticker: '', name: '', type: AssetType.STOCK, currency: Currency.USD, currentPrice: '' });
         setIsModalOpen(true);
     };
 
     const handleOpenEdit = (asset: Asset) => {
         setEditingAsset(asset);
+        // Edit mode skips validation step UI
+        setHasValidated(true); 
+        setValidationError(null);
         setFormData({
             ticker: asset.ticker,
             name: asset.name,
@@ -45,6 +70,46 @@ export const Assets: React.FC = () => {
             currentPrice: asset.currentPrice.toString()
         });
         setIsModalOpen(true);
+    };
+
+    const validateTicker = async () => {
+        if (!formData.ticker) return;
+        
+        setIsValidating(true);
+        setValidationError(null);
+        
+        try {
+            const result = await validateAsset(formData.ticker);
+            if (result.valid) {
+                // Auto-fill form
+                let mappedType = AssetType.STOCK;
+                if (result.type) {
+                     // Simple mapping from API string to Enum
+                     const t = result.type.toLowerCase();
+                     if (t === 'crypto') mappedType = AssetType.CRYPTO;
+                     else if (t === 'etf') mappedType = AssetType.ETF;
+                     else if (t === 'fiat') mappedType = AssetType.FIAT;
+                }
+
+                setFormData({
+                    ...formData,
+                    name: result.name,
+                    currency: result.currency === 'TWD' ? Currency.TWD : Currency.USD,
+                    currentPrice: result.current_price,
+                    type: mappedType
+                });
+                setHasValidated(true);
+            } else {
+                setValidationError('Invalid ticker. Please check and try again.');
+                setHasValidated(false);
+            }
+        } catch (error) {
+            console.error(error);
+            setValidationError('Validation failed. Service may be unavailable.');
+            setHasValidated(false);
+        } finally {
+            setIsValidating(false);
+        }
     };
 
     const handleDelete = async (id: string) => {
@@ -69,7 +134,6 @@ export const Assets: React.FC = () => {
                     name: formData.name,
                     type: formData.type,
                     currency: formData.currency,
-                    // If user edited price, send it, otherwise undefined
                     currentPrice: formData.currentPrice ? parseFloat(formData.currentPrice) : undefined
                 });
             } else {
@@ -111,6 +175,33 @@ export const Assets: React.FC = () => {
     return (
         <div className="p-6 space-y-6 fade-in pb-20">
             
+            {/* Header / Actions */}
+            <div className="flex justify-between items-center">
+                 <h2 className="text-xl font-bold text-gray-900 dark:text-white hidden md:block">All Assets</h2>
+                 <div className="flex gap-3 ml-auto">
+                    {/* Refresh Prices Button */}
+                    <button 
+                        onClick={handleRefreshPrices}
+                        disabled={isRefreshing}
+                        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition-all shadow-sm disabled:opacity-50"
+                    >
+                        <span className={`material-symbols-outlined ${isRefreshing ? 'animate-spin' : ''}`}>
+                            {isRefreshing ? 'sync' : 'sync'}
+                        </span>
+                        <span className="font-medium text-sm hidden sm:inline">Refresh Prices</span>
+                    </button>
+                    
+                    {/* New Asset Button (Desktop) */}
+                    <button 
+                        onClick={handleOpenCreate}
+                        className="hidden md:flex items-center gap-2 px-4 py-2 bg-primary text-background-dark font-bold rounded-lg hover:bg-green-400 transition-colors shadow-lg shadow-green-900/20"
+                    >
+                        <span className="material-symbols-outlined">add</span>
+                        New Asset
+                    </button>
+                 </div>
+            </div>
+
             {/* Asset List Container */}
             <div className="rounded-xl bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark overflow-hidden shadow-sm">
                 
@@ -189,10 +280,10 @@ export const Assets: React.FC = () => {
                 </div>
             </div>
 
-            {/* Floating Action Button */}
+            {/* Mobile Floating Action Button */}
             <button 
                 onClick={handleOpenCreate}
-                className="fixed bottom-8 right-8 flex items-center justify-center w-14 h-14 rounded-full bg-primary text-background-dark shadow-lg hover:bg-green-400 hover:scale-105 transition-all duration-200 z-30 shadow-green-900/20"
+                className="md:hidden fixed bottom-8 right-8 flex items-center justify-center w-14 h-14 rounded-full bg-primary text-background-dark shadow-lg hover:bg-green-400 hover:scale-105 transition-all duration-200 z-30 shadow-green-900/20"
             >
                 <span className="material-symbols-outlined text-3xl">add</span>
             </button>
@@ -201,77 +292,110 @@ export const Assets: React.FC = () => {
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
                     <div className="bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark w-full max-w-md rounded-xl shadow-2xl p-6 transform transition-all">
-                        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                            {editingAsset ? 'Edit Asset' : 'New Asset'}
-                        </h2>
+                        <div className="flex justify-between items-start mb-4">
+                            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                                {editingAsset ? 'Edit Asset' : 'New Asset'}
+                            </h2>
+                            <button 
+                                onClick={() => setIsModalOpen(false)}
+                                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-200"
+                            >
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
                         
                         <form onSubmit={handleSubmit} className="space-y-4">
+                            {/* Step 1: Ticker Input with Validation */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ticker</label>
-                                <input 
-                                    type="text" 
-                                    required
-                                    value={formData.ticker}
-                                    onChange={e => setFormData({...formData, ticker: e.target.value.toUpperCase()})}
-                                    className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-300 dark:border-border-dark rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary outline-none"
-                                    placeholder="e.g. BTC"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
-                                <input 
-                                    type="text" 
-                                    required
-                                    value={formData.name}
-                                    onChange={e => setFormData({...formData, name: e.target.value})}
-                                    className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-300 dark:border-border-dark rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary outline-none"
-                                    placeholder="e.g. Bitcoin"
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
-                                    <select 
-                                        value={formData.type}
-                                        onChange={e => setFormData({...formData, type: e.target.value as AssetType})}
-                                        className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-300 dark:border-border-dark rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary outline-none"
-                                    >
-                                        {Object.values(AssetType).map(type => (
-                                            <option key={type} value={type}>{type}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Currency</label>
-                                    <select 
-                                        value={formData.currency}
-                                        onChange={e => setFormData({...formData, currency: e.target.value as Currency})}
-                                        className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-300 dark:border-border-dark rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary outline-none"
-                                    >
-                                        <option value={Currency.USD}>USD</option>
-                                        <option value={Currency.TWD}>TWD</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            {/* Only show price editing if updating, creating usually fetches price automatically */}
-                            {editingAsset && (
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Price (Optional Override)</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ticker Symbol</label>
+                                <div className="flex gap-2">
                                     <input 
-                                        type="number" 
-                                        step="0.01"
-                                        value={formData.currentPrice}
-                                        onChange={e => setFormData({...formData, currentPrice: e.target.value})}
-                                        className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-300 dark:border-border-dark rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary outline-none"
-                                        placeholder="Leave empty to keep current"
+                                        type="text" 
+                                        required
+                                        autoFocus={!editingAsset}
+                                        value={formData.ticker}
+                                        onChange={e => {
+                                            setFormData({...formData, ticker: e.target.value.toUpperCase()});
+                                            if (!editingAsset) setHasValidated(false); // Reset validation if changed in create mode
+                                        }}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter' && !editingAsset) {
+                                                e.preventDefault();
+                                                validateTicker();
+                                            }
+                                        }}
+                                        className="flex-1 px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-300 dark:border-border-dark rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary outline-none font-mono uppercase"
+                                        placeholder="e.g. BTC"
                                     />
+                                    {!editingAsset && (
+                                        <button 
+                                            type="button"
+                                            onClick={validateTicker}
+                                            disabled={isValidating || !formData.ticker}
+                                            className="px-3 py-2 bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-white/20 transition-colors flex items-center gap-1 disabled:opacity-50"
+                                        >
+                                            {isValidating ? (
+                                                <span className="material-symbols-outlined animate-spin text-sm">sync</span>
+                                            ) : (
+                                                <span className="material-symbols-outlined text-sm">check</span>
+                                            )}
+                                            <span className="text-sm font-bold">Check</span>
+                                        </button>
+                                    )}
+                                </div>
+                                {validationError && (
+                                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                                        <span className="material-symbols-outlined text-sm">error</span>
+                                        {validationError}
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Step 2: Auto-filled / Editable Details */}
+                            {/* Only show these fields if asset is being edited OR if ticker is validated */}
+                            {(hasValidated || editingAsset) && (
+                                <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Asset Name</label>
+                                        <input 
+                                            type="text" 
+                                            required
+                                            value={formData.name}
+                                            onChange={e => setFormData({...formData, name: e.target.value})}
+                                            className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-300 dark:border-border-dark rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary outline-none"
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
+                                            <select 
+                                                value={formData.type}
+                                                onChange={e => setFormData({...formData, type: e.target.value as AssetType})}
+                                                className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-300 dark:border-border-dark rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary outline-none"
+                                            >
+                                                {Object.values(AssetType).map(t => (
+                                                    <option key={t} value={t}>{t}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Currency</label>
+                                            <select 
+                                                value={formData.currency}
+                                                onChange={e => setFormData({...formData, currency: e.target.value as Currency})}
+                                                className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-300 dark:border-border-dark rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary outline-none"
+                                            >
+                                                <option value={Currency.USD}>USD</option>
+                                                <option value={Currency.TWD}>TWD</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 
-                            <div className="flex justify-end gap-3 mt-6">
+                            <div className="flex justify-end gap-3 mt-6 pt-2 border-t border-gray-100 dark:border-border-dark">
                                 <button 
                                     type="button"
                                     onClick={() => setIsModalOpen(false)}
@@ -281,7 +405,8 @@ export const Assets: React.FC = () => {
                                 </button>
                                 <button 
                                     type="submit"
-                                    className="px-4 py-2 text-sm font-bold text-background-dark bg-primary hover:bg-green-400 rounded-lg transition-colors shadow-lg shadow-green-900/20"
+                                    disabled={!hasValidated && !editingAsset}
+                                    className="px-4 py-2 text-sm font-bold text-background-dark bg-primary hover:bg-green-400 rounded-lg transition-colors shadow-lg shadow-green-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {editingAsset ? 'Save Changes' : 'Create Asset'}
                                 </button>
