@@ -1,6 +1,7 @@
 
-import { Asset, Account, AssetType, AssetCreateRequest, AssetUpdateRequest, Currency, AccountCreateRequest, AccountUpdateRequest, Transaction, TransactionType, TransactionCreateRequest, TransactionUpdateRequest, PortfolioListItem, Portfolio, PortfolioSummary, PortfolioCreateRequest, PortfolioUpdateRequest, Holding, ConnectedAccount } from '../types';
-import { ASSETS_DATA, ACCOUNTS_DATA, TRANSACTIONS_DATA, PORTFOLIOS_DATA, PORTFOLIO_DETAILS_MOCK } from '../constants';
+
+import { Asset, Account, AssetType, AssetCreateRequest, AssetUpdateRequest, Currency, AccountCreateRequest, AccountUpdateRequest, Transaction, TransactionType, TransactionCreateRequest, TransactionUpdateRequest, PortfolioListItem, Portfolio, PortfolioSummary, PortfolioCreateRequest, PortfolioUpdateRequest, Holding, ConnectedAccount, DashboardStats } from '../types';
+import { ASSETS_DATA, ACCOUNTS_DATA, TRANSACTIONS_DATA, PORTFOLIOS_DATA, PORTFOLIO_DETAILS_MOCK, KPIS, ASSET_ALLOCATION_DATA } from '../constants';
 
 // Configuration
 const API_BASE_URL = 'http://localhost:8000';
@@ -84,6 +85,20 @@ interface PortfolioSummaryResponse {
     daily_change_percent: string;
     holdings: HoldingItemResponse[];
     accounts: AccountSummaryItemResponse[];
+}
+
+interface DashboardStatsResponse {
+    net_worth: string;
+    net_worth_change_24h: number;
+    total_profit: string;
+    total_profit_change_24h: number;
+    top_performer_name: string | null;
+    top_performer_change: number | null;
+    allocation: {
+        label: string;
+        value: string;
+        percentage: number;
+    }[];
 }
 
 export interface AssetValidateResponse {
@@ -489,9 +504,16 @@ export const deletePortfolio = async (id: string): Promise<void> => {
 
 // --- Transactions APIs ---
 
-export const fetchTransactions = async (): Promise<Transaction[]> => {
+export const fetchTransactions = async (params?: { limit?: number; offset?: number; accountId?: string }): Promise<Transaction[]> => {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/transactions/?limit=100`, {
+        const queryParams = new URLSearchParams();
+        if (params?.limit) queryParams.append('limit', params.limit.toString());
+        else queryParams.append('limit', '100');
+        
+        if (params?.offset) queryParams.append('offset', params.offset.toString());
+        if (params?.accountId) queryParams.append('account_id', params.accountId);
+
+        const response = await fetch(`${API_BASE_URL}/api/v1/transactions/?${queryParams.toString()}`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
         });
@@ -504,7 +526,13 @@ export const fetchTransactions = async (): Promise<Transaction[]> => {
 
         return data.map(item => {
             const quantity = item.quantity ? parseFloat(item.quantity) : 0;
-            const price = item.price_per_unit ? parseFloat(item.price_per_unit) : 0;
+            let price = item.price_per_unit ? parseFloat(item.price_per_unit) : 0;
+            
+            // For deposits/withdrawals, if price is missing, treat quantity as face value (price=1)
+            // This assumes non-asset transactions implies currency value in quantity.
+            if (price === 0 && !item.asset_id && quantity !== 0) {
+                 price = 1; 
+            }
             const amount = quantity * price;
 
             return {
@@ -580,4 +608,67 @@ export const deleteTransaction = async (id: string): Promise<void> => {
     });
 
     if (!response.ok) throw new Error('Failed to delete transaction');
+};
+
+// --- Dashboard APIs ---
+
+export const fetchDashboardStats = async (): Promise<DashboardStats> => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/v1/dashboard/`, {
+             method: 'GET',
+             headers: { 'Content-Type': 'application/json' }
+        });
+        if (!response.ok) throw new Error(`API Error: ${response.status}`);
+        
+        const data: DashboardStatsResponse = await response.json();
+        
+        // Colors for allocation
+        const colors: Record<string, string> = {
+            'stock': '#3b82f6',
+            'etf': '#10b981',
+            'crypto': '#f97316',
+            'cash': '#9ca3af',
+            'fiat': '#6b7280'
+        };
+        const defaultColors = ['#3b82f6', '#10b981', '#f97316', '#9ca3af', '#eab308', '#ec4899'];
+
+        const allocation = data.allocation.map((item, index) => {
+             // Basic mapping from label to AssetType if possible, otherwise map blindly
+             let type = AssetType.STOCK; 
+             const lowerLabel = item.label.toLowerCase();
+             if (lowerLabel === 'crypto') type = AssetType.CRYPTO;
+             else if (lowerLabel === 'etf') type = AssetType.ETF;
+             else if (lowerLabel === 'cash') type = AssetType.CASH;
+             else if (lowerLabel === 'fiat') type = AssetType.FIAT;
+             
+             return {
+                 type: type, // Keeping type for type safety, but UI might want label
+                 value: parseFloat(item.value),
+                 color: colors[lowerLabel] || defaultColors[index % defaultColors.length]
+             };
+        });
+
+        return {
+            netWorth: parseFloat(data.net_worth),
+            netWorthChange: data.net_worth_change_24h,
+            totalProfit: parseFloat(data.total_profit),
+            totalProfitChange: data.total_profit_change_24h,
+            topPerformerName: data.top_performer_name,
+            topPerformerChange: data.top_performer_change,
+            allocation: allocation
+        };
+
+    } catch (e) {
+        console.warn("Using mock dashboard stats", e);
+        // Map Mock Data from constants to correct structure
+        return {
+            netWorth: KPIS.netWorth,
+            netWorthChange: KPIS.netWorthChange,
+            totalProfit: KPIS.totalProfit,
+            totalProfitChange: KPIS.totalProfitChange,
+            topPerformerName: KPIS.topPerformerName,
+            topPerformerChange: KPIS.topPerformerChange,
+            allocation: ASSET_ALLOCATION_DATA
+        };
+    }
 };

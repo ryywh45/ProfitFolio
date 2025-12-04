@@ -119,6 +119,17 @@ export interface PortfolioSummary {
     accounts: ConnectedAccount[];
 }
 
+// Dashboard Stats from API
+export interface DashboardStats {
+    netWorth: number;
+    netWorthChange: number; // Percentage
+    totalProfit: number;
+    totalProfitChange: number; // Percentage
+    topPerformerName: string | null;
+    topPerformerChange: number | null; // Percentage
+    allocation: AssetAllocation[];
+}
+
 // DTOs for API Requests based on OpenAPI
 
 export interface AssetCreateRequest {

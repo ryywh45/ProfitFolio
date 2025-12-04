@@ -50,7 +50,7 @@ const App: React.FC = () => {
     const renderContent = () => {
         switch (activeTab) {
             case 'dashboard':
-                return <Dashboard />;
+                return <Dashboard onNavigateToTransactions={() => handleTabChange('transactions')} />;
             case 'portfolios':
                 if (selectedPortfolioId) {
                     // Render Detail View without Header since Detail View has its own breadcrumb header
