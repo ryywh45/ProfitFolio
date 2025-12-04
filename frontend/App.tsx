@@ -54,7 +54,7 @@ const App: React.FC = () => {
             case 'portfolios':
                 if (selectedPortfolioId) {
                     // Render Detail View without Header since Detail View has its own breadcrumb header
-                    return <PortfolioDetails onBack={() => setSelectedPortfolioId(null)} />;
+                    return <PortfolioDetails portfolioId={selectedPortfolioId} onBack={() => setSelectedPortfolioId(null)} />;
                 }
                 return <Portfolios onViewDetails={(id) => setSelectedPortfolioId(id)} />;
             case 'accounts':

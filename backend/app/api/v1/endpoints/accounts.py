@@ -23,7 +23,7 @@ def read_accounts(
     limit: Annotated[int, Query(le=100)] = 100,
 ):
     """
-    Retrieve accounts.
+    Retrieve accounts with total balance.
     """
     return account_service.get_accounts(offset=offset, limit=limit)
 
@@ -31,7 +31,7 @@ def read_accounts(
 @router.get("/{account_id}", response_model=AccountRead)
 def read_account_by_id(account_service: ServiceDep, account_id: int):
     """
-    Get a specific account by ID.
+    Get a specific account by ID with total balance.
     """
     account = account_service.get_account_by_id(account_id=account_id)
     if not account:
@@ -44,11 +44,12 @@ def update_account_by_id(account_service: ServiceDep, account_id: int, account_i
     """
     Update an account.
     """
-    account = account_service.get_account_by_id(account_id=account_id)
+    # Fetch raw model for update
+    account = account_service.get_account_model(account_id=account_id)
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
     
-    return account_service.update_account(account=account, account_in=account_in)
+    return account_service.update_account(db_account=account, account_in=account_in)
 
 
 @router.delete("/{account_id}")
@@ -56,9 +57,10 @@ def delete_account_by_id(account_service: ServiceDep, account_id: int):
     """
     Delete an account.
     """
-    account = account_service.get_account_by_id(account_id=account_id)
+    # Fetch raw model for deletion
+    account = account_service.get_account_model(account_id=account_id)
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
     
-    account_service.delete_account(account=account)
+    account_service.delete_account(db_account=account)
     return {"ok": True}

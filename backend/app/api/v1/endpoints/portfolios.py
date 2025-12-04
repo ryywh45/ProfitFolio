@@ -2,7 +2,13 @@ from typing import Annotated, List
 from fastapi import APIRouter, Depends, Query, HTTPException
 
 from app.services.portfolio import PortfolioService
-from app.schemas.portfolio import PortfolioCreate, PortfolioRead, PortfolioUpdate
+from app.schemas.portfolio import (
+    PortfolioCreate, 
+    PortfolioRead, 
+    PortfolioUpdate, 
+    PortfolioListItem, 
+    PortfolioSummary
+)
 
 router = APIRouter()
 
@@ -16,16 +22,27 @@ def create_portfolio(portfolio_service: ServiceDep, portfolio_in: PortfolioCreat
     return portfolio_service.create_portfolio(portfolio_in=portfolio_in)
 
 
-@router.get("/", response_model=List[PortfolioRead])
+@router.get("/", response_model=List[PortfolioListItem])
 def read_portfolios(
     portfolio_service: ServiceDep,
     offset: int = 0,
     limit: Annotated[int, Query(le=100)] = 100,
 ):
     """
-    Retrieve portfolios.
+    Retrieve portfolios with summary data.
     """
     return portfolio_service.get_portfolios(offset=offset, limit=limit)
+
+
+@router.get("/{portfolio_id}/summary", response_model=PortfolioSummary)
+def read_portfolio_summary(portfolio_service: ServiceDep, portfolio_id: int):
+    """
+    Get a detailed summary of a specific portfolio.
+    """
+    portfolio_summary = portfolio_service.get_portfolio_summary(portfolio_id=portfolio_id)
+    if not portfolio_summary:
+        raise HTTPException(status_code=404, detail="Portfolio not found")
+    return portfolio_summary
 
 
 @router.get("/{portfolio_id}", response_model=PortfolioRead)

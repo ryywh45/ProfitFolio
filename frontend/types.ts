@@ -1,3 +1,5 @@
+
+
 export enum Currency {
     USD = 'USD',
     TWD = 'TWD'
@@ -32,6 +34,7 @@ export interface Transaction {
     amount: number; // Calculated: quantity * pricePerUnit
     fee: number;
     notes?: string;
+    currency: Currency;
 }
 
 export interface AssetAllocation {
@@ -46,12 +49,22 @@ export interface MenuItem {
     id: string;
 }
 
-export interface Portfolio {
+// Used for the List View
+export interface PortfolioListItem {
     id: string;
     name: string;
     totalValue: number;
     dailyChange: number;
     dailyChangePercent: number;
+}
+
+// Basic Portfolio Data (for editing)
+export interface Portfolio {
+    id: string;
+    name: string;
+    description?: string;
+    accountIds: string[]; // IDs of accounts linked to this portfolio
+    createdAt: string;
 }
 
 export interface Account {
@@ -72,7 +85,7 @@ export interface Asset {
     lastUpdated: string;
 }
 
-// Portfolio Details Types
+// Portfolio Details / Summary View Types
 export interface Holding {
     id: string;
     ticker: string;
@@ -84,7 +97,7 @@ export interface Holding {
     profit: number;
     profitPercent: number;
     allocation: number; // 0-100
-    color: string; // For chart matching
+    color?: string; // Optional, frontend can generate this
 }
 
 export interface ConnectedAccount {
@@ -92,6 +105,18 @@ export interface ConnectedAccount {
     name: string;
     type: string;
     balance: number;
+}
+
+export interface PortfolioSummary {
+    id: string;
+    name: string;
+    totalValue: number;
+    totalProfit: number;
+    totalProfitPercent: number;
+    dailyChange: number;
+    dailyChangePercent: number;
+    holdings: Holding[];
+    accounts: ConnectedAccount[];
 }
 
 // DTOs for API Requests based on OpenAPI
@@ -119,6 +144,18 @@ export interface AccountCreateRequest {
 export interface AccountUpdateRequest {
     name?: string;
     currency?: string;
+}
+
+export interface PortfolioCreateRequest {
+    name: string;
+    description?: string;
+    account_ids?: number[];
+}
+
+export interface PortfolioUpdateRequest {
+    name?: string;
+    description?: string;
+    account_ids?: number[];
 }
 
 export interface TransactionCreateRequest {

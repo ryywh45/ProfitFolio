@@ -71,79 +71,32 @@ class AssetService:
         """
         assets = self.session.exec(select(Asset)).all()
         count = 0
-        
-        # Optimization: yfinance can fetch multiple tickers at once: yf.Tickers("AAPL MSFT")
-        # But for simplicity and error isolation, we can loop first or batch them.
-        # Let's batch them for efficiency.
-        
         if not assets:
             return 0
 
-        tickers_map = {asset.ticker: asset for asset in assets}
-        tickers_str = " ".join(tickers_map.keys())
-        
-        try:
-            # Use yf.Tickers to fetch batch data
-            tickers_data = yf.Tickers(tickers_str)
-            
-            # Accessing tickers_data.tickers returns a dict of Ticker objects
-            # We can iterate through our assets and fetch price from the batch object
-            
-            for ticker_symbol, asset in tickers_map.items():
-                try:
-                    # yfinance structure for multiple tickers
-                    # data = tickers_data.tickers[ticker_symbol].info # This might be slow as it fetches one by one?
-                    # Actually yf.download is faster for bulk history, but for current info 'Tickers' object is okay but accessing .info property might trigger requests individually.
-                    # A more efficient way for PRICE ONLY is `yf.download(..., period="1d")`
-                    
-                    # Let's try yf.download for bulk current price (closing price of last day/current)
-                    pass 
-                except Exception:
-                    continue
+        updated_time = datetime.now(timezone(timedelta(hours=8)))
 
-            # Re-approach: yf.download is best for bulk prices
-            df = yf.download(tickers_str, period="1d", progress=False)['Close']
-            
-            # df might be a Series (if 1 asset) or DataFrame (if multiple)
-            # And it might have MultiIndex columns if multiple tickers? No, 'Close' usually gives Tickers as columns.
-            
-            updated_time = datetime.now(timezone(timedelta(hours=8)))
-            
-            for asset in assets:
-                try:
-                    price = 0
-                    if len(assets) == 1:
-                        # df is a Series or DataFrame with 1 col?
-                        # yfinance is tricky with shapes.
-                        # If single ticker, df['Close'] is a Series with Date index.
-                        # recent_price = df.iloc[-1]
-                        # Wait, we need to be careful.
-                        pass
-                    
-                    # Let's stick to individual updates for reliability first, unless list is huge.
-                    # Or use the individual loop which is safer but slower.
-                    # Given "ProfitFolio" implies personal portfolio (scale < 100 assets usually), individual is acceptable.
-                    
+        for asset in assets:
+            try:
+                if asset.type == AssetType.fiat and not asset.ticker.endswith("=X"):
+                    ticker_obj = yf.Ticker(asset.ticker + "=X")
+                else:
                     ticker_obj = yf.Ticker(asset.ticker)
-                    info = ticker_obj.fast_info # fast_info is faster than info
-                    current_price = info.last_price
+                info = ticker_obj.fast_info # fast_info is faster than info
+                current_price = info.last_price
+                
+                if current_price:
+                    asset.current_price = Decimal(current_price)
+                    asset.last_updated = updated_time
+                    self.session.add(asset)
+                    count += 1
                     
-                    if current_price:
-                        asset.current_price = Decimal(current_price)
-                        asset.last_updated = updated_time
-                        self.session.add(asset)
-                        count += 1
-                        
-                except Exception as e:
-                    print(f"Failed to update {asset.ticker}: {e}")
-                    continue
-            
-            self.session.commit()
-            return count
-
-        except Exception as e:
-            print(f"Batch update failed: {e}")
-            return 0
+            except Exception as e:
+                print(f"Failed to update {asset.ticker}: {e}")
+                continue
+        
+        self.session.commit()
+        return count
 
     def create_asset(self, asset_in: AssetCreate) -> Asset:
         db_asset = Asset.model_validate(asset_in)

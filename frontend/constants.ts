@@ -1,5 +1,6 @@
 
-import { AssetAllocation, AssetType, MenuItem, Transaction, TransactionType, Currency, Portfolio, Account, Asset, Holding, ConnectedAccount } from './types';
+
+import { AssetAllocation, AssetType, MenuItem, Transaction, TransactionType, Currency, Portfolio, Account, Asset, Holding, ConnectedAccount, PortfolioListItem } from './types';
 
 export const MENU_ITEMS: MenuItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -18,20 +19,20 @@ export const ASSET_ALLOCATION_DATA: AssetAllocation[] = [
 
 // Used in Dashboard (Subset)
 export const RECENT_TRANSACTIONS: Transaction[] = [
-    { id: '1', date: '2023-10-26', accountName: 'Firstrade', type: TransactionType.BUY, assetSymbol: 'AAPL', quantity: 10, pricePerUnit: 170.50, amount: 1705.00, fee: 1.00, currency: Currency.USD },
-    { id: '2', date: '2023-10-25', accountName: 'Firstrade', type: TransactionType.SELL, assetSymbol: 'GOOGL', quantity: 5, pricePerUnit: 135.20, amount: 676.00, fee: 1.00, currency: Currency.USD },
-    { id: '3', date: '2023-10-24', accountName: 'Binance', type: TransactionType.BUY, assetSymbol: 'BTC', quantity: 0.05, pricePerUnit: 34500.00, amount: 1725.00, fee: 2.50, currency: Currency.USD },
-    { id: '4', date: '2023-10-23', accountName: 'Cash', type: TransactionType.DEPOSIT, assetSymbol: '-', quantity: null, pricePerUnit: null, amount: 5000.00, fee: 0.00, currency: Currency.USD },
-    { id: '5', date: '2023-10-22', accountName: 'Cash', type: TransactionType.WITHDRAWAL, assetSymbol: '-', quantity: null, pricePerUnit: null, amount: -500.00, fee: 0.00, currency: Currency.USD },
+    { id: '1', date: '2023-10-26', accountId: '2', accountName: 'Firstrade', type: TransactionType.BUY, assetSymbol: 'AAPL', quantity: 10, pricePerUnit: 170.50, amount: 1705.00, fee: 1.00, currency: Currency.USD },
+    { id: '2', date: '2023-10-25', accountId: '2', accountName: 'Firstrade', type: TransactionType.SELL, assetSymbol: 'GOOGL', quantity: 5, pricePerUnit: 135.20, amount: 676.00, fee: 1.00, currency: Currency.USD },
+    { id: '3', date: '2023-10-24', accountId: '1', accountName: 'Binance', type: TransactionType.BUY, assetSymbol: 'BTC', quantity: 0.05, pricePerUnit: 34500.00, amount: 1725.00, fee: 2.50, currency: Currency.USD },
+    { id: '4', date: '2023-10-23', accountId: '4', accountName: 'Cash', type: TransactionType.DEPOSIT, assetSymbol: '-', quantity: null, pricePerUnit: null, amount: 5000.00, fee: 0.00, currency: Currency.USD },
+    { id: '5', date: '2023-10-22', accountId: '4', accountName: 'Cash', type: TransactionType.WITHDRAWAL, assetSymbol: '-', quantity: null, pricePerUnit: null, amount: -500.00, fee: 0.00, currency: Currency.USD },
 ];
 
 // Full List for Transactions Page
 export const TRANSACTIONS_DATA: Transaction[] = [
-    { id: '1', date: '2023-10-26', accountName: 'Firstrade', type: TransactionType.BUY, assetSymbol: 'AAPL', quantity: 10, pricePerUnit: 170.50, amount: 1705.00, fee: 1.00, currency: Currency.USD },
-    { id: '2', date: '2023-10-25', accountName: 'Firstrade', type: TransactionType.SELL, assetSymbol: 'GOOGL', quantity: 5, pricePerUnit: 135.20, amount: 676.00, fee: 1.00, currency: Currency.USD },
-    { id: '3', date: '2023-10-24', accountName: 'Binance', type: TransactionType.BUY, assetSymbol: 'BTC', quantity: 0.05, pricePerUnit: 34500.00, amount: 1725.00, fee: 2.50, currency: Currency.USD },
-    { id: '4', date: '2023-10-23', accountName: 'Cash', type: TransactionType.DEPOSIT, assetSymbol: '-', quantity: null, pricePerUnit: null, amount: 5000.00, fee: 0.00, currency: Currency.USD },
-    { id: '5', date: '2023-10-22', accountName: 'Cash', type: TransactionType.WITHDRAWAL, assetSymbol: '-', quantity: null, pricePerUnit: null, amount: -500.00, fee: 0.00, currency: Currency.USD },
+    { id: '1', date: '2023-10-26', accountId: '2', accountName: 'Firstrade', type: TransactionType.BUY, assetSymbol: 'AAPL', quantity: 10, pricePerUnit: 170.50, amount: 1705.00, fee: 1.00, currency: Currency.USD },
+    { id: '2', date: '2023-10-25', accountId: '2', accountName: 'Firstrade', type: TransactionType.SELL, assetSymbol: 'GOOGL', quantity: 5, pricePerUnit: 135.20, amount: 676.00, fee: 1.00, currency: Currency.USD },
+    { id: '3', date: '2023-10-24', accountId: '1', accountName: 'Binance', type: TransactionType.BUY, assetSymbol: 'BTC', quantity: 0.05, pricePerUnit: 34500.00, amount: 1725.00, fee: 2.50, currency: Currency.USD },
+    { id: '4', date: '2023-10-23', accountId: '4', accountName: 'Cash', type: TransactionType.DEPOSIT, assetSymbol: '-', quantity: null, pricePerUnit: null, amount: 5000.00, fee: 0.00, currency: Currency.USD },
+    { id: '5', date: '2023-10-22', accountId: '4', accountName: 'Cash', type: TransactionType.WITHDRAWAL, assetSymbol: '-', quantity: null, pricePerUnit: null, amount: -500.00, fee: 0.00, currency: Currency.USD },
 ];
 
 export const KPIS = {
@@ -43,7 +44,7 @@ export const KPIS = {
     topPerformerChange: 8.21
 };
 
-export const PORTFOLIOS_DATA: Portfolio[] = [
+export const PORTFOLIOS_DATA: PortfolioListItem[] = [
     { id: '1', name: '退休基金', totalValue: 125430.50, dailyChange: 1280.15, dailyChangePercent: 1.03 },
     { id: '2', name: '加密貨幣波段', totalValue: 48912.88, dailyChange: -2345.60, dailyChangePercent: -4.58 },
     { id: '3', name: '子女教育基金', totalValue: 76820.00, dailyChange: 650.40, dailyChangePercent: 0.85 },

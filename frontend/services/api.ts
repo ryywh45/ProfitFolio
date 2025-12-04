@@ -1,5 +1,6 @@
-import { Asset, Account, AssetType, AssetCreateRequest, AssetUpdateRequest, Currency, AccountCreateRequest, AccountUpdateRequest, Transaction, TransactionType, TransactionCreateRequest, TransactionUpdateRequest } from '../types';
-import { ASSETS_DATA, ACCOUNTS_DATA, TRANSACTIONS_DATA } from '../constants';
+
+import { Asset, Account, AssetType, AssetCreateRequest, AssetUpdateRequest, Currency, AccountCreateRequest, AccountUpdateRequest, Transaction, TransactionType, TransactionCreateRequest, TransactionUpdateRequest, PortfolioListItem, Portfolio, PortfolioSummary, PortfolioCreateRequest, PortfolioUpdateRequest, Holding, ConnectedAccount } from '../types';
+import { ASSETS_DATA, ACCOUNTS_DATA, TRANSACTIONS_DATA, PORTFOLIOS_DATA, PORTFOLIO_DETAILS_MOCK } from '../constants';
 
 // Configuration
 const API_BASE_URL = 'http://localhost:8000';
@@ -20,6 +21,7 @@ interface AccountResponse {
     name: string;
     currency: string;
     created_at: string;
+    total_balance?: string;
 }
 
 interface TransactionResponse {
@@ -34,6 +36,54 @@ interface TransactionResponse {
     fee: string;
     transaction_time: string;
     notes?: string;
+}
+
+interface PortfolioListItemResponse {
+    id: number;
+    name: string;
+    total_value: string;
+    daily_change: string;
+    daily_change_percent: string;
+}
+
+interface PortfolioResponse {
+    id: number;
+    name: string;
+    description?: string;
+    created_at: string;
+    accounts: AccountResponse[];
+}
+
+interface HoldingItemResponse {
+    id: string;
+    ticker: string;
+    name: string;
+    current_price: string;
+    quantity: string;
+    average_cost: string;
+    market_value: string;
+    profit: string;
+    profit_percent: string;
+    allocation: string;
+}
+
+interface AccountSummaryItemResponse {
+    id: number;
+    name: string;
+    type: string;
+    balance: string;
+}
+
+interface PortfolioSummaryResponse {
+    id: number;
+    name: string;
+    total_value: string;
+    total_profit: string;
+    total_profit_percent: string;
+    daily_change: string;
+    daily_change_percent: string;
+    holdings: HoldingItemResponse[];
+    accounts: AccountSummaryItemResponse[];
 }
 
 export interface AssetValidateResponse {
@@ -95,9 +145,8 @@ const mapFrontendTransactionTypeToApi = (type: TransactionType): string => {
     }
 };
 
-/**
- * GET /api/v1/assets/
- */
+// --- Assets APIs ---
+
 export const fetchAssets = async (): Promise<Asset[]> => {
     try {
         const response = await fetch(`${API_BASE_URL}/api/v1/assets/?limit=100`, {
@@ -127,10 +176,6 @@ export const fetchAssets = async (): Promise<Asset[]> => {
     }
 };
 
-/**
- * POST /api/v1/assets/validate
- * Validate Asset Ticker
- */
 export const validateAsset = async (ticker: string): Promise<AssetValidateResponse> => {
     const response = await fetch(`${API_BASE_URL}/api/v1/assets/validate`, {
         method: 'POST',
@@ -145,10 +190,6 @@ export const validateAsset = async (ticker: string): Promise<AssetValidateRespon
     return await response.json();
 };
 
-/**
- * POST /api/v1/assets/update_prices
- * Update All Prices
- */
 export const updateAllAssetPrices = async (): Promise<void> => {
     const response = await fetch(`${API_BASE_URL}/api/v1/assets/update_prices`, {
         method: 'POST',
@@ -160,9 +201,6 @@ export const updateAllAssetPrices = async (): Promise<void> => {
     }
 };
 
-/**
- * POST /api/v1/assets/
- */
 export const createAsset = async (asset: { ticker: string; name: string; type: AssetType; currency: Currency }): Promise<Asset> => {
     const payload: AssetCreateRequest = {
         ticker: asset.ticker,
@@ -194,9 +232,6 @@ export const createAsset = async (asset: { ticker: string; name: string; type: A
     };
 };
 
-/**
- * PATCH /api/v1/assets/{id}
- */
 export const updateAsset = async (id: string, updates: { ticker?: string; name?: string; type?: AssetType; currency?: Currency; currentPrice?: number }): Promise<Asset> => {
     const payload: AssetUpdateRequest = {};
     if (updates.ticker) payload.ticker = updates.ticker;
@@ -225,9 +260,6 @@ export const updateAsset = async (id: string, updates: { ticker?: string; name?:
     };
 };
 
-/**
- * DELETE /api/v1/assets/{id}
- */
 export const deleteAsset = async (id: string): Promise<void> => {
     const response = await fetch(`${API_BASE_URL}/api/v1/assets/${id}`, {
         method: 'DELETE',
@@ -236,9 +268,8 @@ export const deleteAsset = async (id: string): Promise<void> => {
     if (!response.ok) throw new Error('Failed to delete asset');
 };
 
-/**
- * GET /api/v1/accounts/
- */
+// --- Accounts APIs ---
+
 export const fetchAccounts = async (): Promise<Account[]> => {
     try {
         const response = await fetch(`${API_BASE_URL}/api/v1/accounts/?limit=100`, {
@@ -256,7 +287,7 @@ export const fetchAccounts = async (): Promise<Account[]> => {
             id: item.id.toString(),
             name: item.name,
             currency: mapCurrencyToFrontend(item.currency),
-            balance: 0, 
+            balance: parseFloat(item.total_balance || '0'), 
             lastUpdated: new Date(item.created_at).toLocaleString()
         }));
 
@@ -266,9 +297,6 @@ export const fetchAccounts = async (): Promise<Account[]> => {
     }
 };
 
-/**
- * POST /api/v1/accounts/
- */
 export const createAccount = async (account: { name: string; currency: Currency }): Promise<Account> => {
     const payload: AccountCreateRequest = {
         name: account.name,
@@ -291,14 +319,11 @@ export const createAccount = async (account: { name: string; currency: Currency 
         id: item.id.toString(),
         name: item.name,
         currency: mapCurrencyToFrontend(item.currency),
-        balance: 0,
+        balance: parseFloat(item.total_balance || '0'),
         lastUpdated: new Date(item.created_at).toLocaleString()
     };
 };
 
-/**
- * PATCH /api/v1/accounts/{id}
- */
 export const updateAccount = async (id: string, updates: { name?: string; currency?: Currency }): Promise<Account> => {
     const payload: AccountUpdateRequest = {};
     if (updates.name) payload.name = updates.name;
@@ -317,14 +342,11 @@ export const updateAccount = async (id: string, updates: { name?: string; curren
         id: item.id.toString(),
         name: item.name,
         currency: mapCurrencyToFrontend(item.currency),
-        balance: 0,
+        balance: parseFloat(item.total_balance || '0'),
         lastUpdated: new Date(item.created_at).toLocaleString()
     };
 };
 
-/**
- * DELETE /api/v1/accounts/{id}
- */
 export const deleteAccount = async (id: string): Promise<void> => {
     const response = await fetch(`${API_BASE_URL}/api/v1/accounts/${id}`, {
         method: 'DELETE',
@@ -333,10 +355,140 @@ export const deleteAccount = async (id: string): Promise<void> => {
     if (!response.ok) throw new Error('Failed to delete account');
 };
 
-/**
- * GET /api/v1/transactions/
- * Read Transactions
- */
+// --- Portfolios APIs ---
+
+export const fetchPortfolios = async (): Promise<PortfolioListItem[]> => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/v1/portfolios/?limit=100`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (!response.ok) throw new Error(`API Error: ${response.status}`);
+
+        const data: PortfolioListItemResponse[] = await response.json();
+        return data.map(item => ({
+            id: item.id.toString(),
+            name: item.name,
+            totalValue: parseFloat(item.total_value),
+            dailyChange: parseFloat(item.daily_change),
+            dailyChangePercent: parseFloat(item.daily_change_percent)
+        }));
+    } catch (error) {
+        console.warn("Using mock portfolios", error);
+        return new Promise(resolve => setTimeout(() => resolve(PORTFOLIOS_DATA), 500));
+    }
+};
+
+export const fetchPortfolio = async (id: string): Promise<Portfolio> => {
+    const response = await fetch(`${API_BASE_URL}/api/v1/portfolios/${id}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+
+    const data: PortfolioResponse = await response.json();
+    return {
+        id: data.id.toString(),
+        name: data.name,
+        description: data.description,
+        accountIds: data.accounts.map(a => a.id.toString()),
+        createdAt: data.created_at
+    };
+};
+
+export const fetchPortfolioSummary = async (id: string): Promise<PortfolioSummary> => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/v1/portfolios/${id}/summary`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (!response.ok) throw new Error(`API Error: ${response.status}`);
+
+        const data: PortfolioSummaryResponse = await response.json();
+
+        // Generate color palette for holdings
+        const colors = ['#3b82f6', '#ec4899', '#eab308', '#14b8a6', '#a855f7', '#f97316', '#6366f1'];
+        
+        return {
+            id: data.id.toString(),
+            name: data.name,
+            totalValue: parseFloat(data.total_value),
+            totalProfit: parseFloat(data.total_profit),
+            totalProfitPercent: parseFloat(data.total_profit_percent),
+            dailyChange: parseFloat(data.daily_change),
+            dailyChangePercent: parseFloat(data.daily_change_percent),
+            holdings: data.holdings.map((h, index) => ({
+                id: h.id,
+                ticker: h.ticker,
+                name: h.name,
+                currentPrice: parseFloat(h.current_price),
+                quantity: parseFloat(h.quantity),
+                averageCost: parseFloat(h.average_cost),
+                marketValue: parseFloat(h.market_value),
+                profit: parseFloat(h.profit),
+                profitPercent: parseFloat(h.profit_percent),
+                allocation: parseFloat(h.allocation),
+                color: colors[index % colors.length]
+            })),
+            accounts: data.accounts.map(a => ({
+                id: a.id.toString(),
+                name: a.name,
+                type: a.type,
+                balance: parseFloat(a.balance)
+            }))
+        };
+    } catch (error) {
+        console.warn("Using mock portfolio details", error);
+        if (id === '1') return new Promise(resolve => setTimeout(() => resolve(PORTFOLIO_DETAILS_MOCK), 500));
+        throw error;
+    }
+};
+
+export const createPortfolio = async (data: { name: string; description?: string; accountIds: string[] }): Promise<void> => {
+    const payload: PortfolioCreateRequest = {
+        name: data.name,
+        description: data.description,
+        account_ids: data.accountIds.map(id => parseInt(id))
+    };
+
+    const response = await fetch(`${API_BASE_URL}/api/v1/portfolios/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) throw new Error('Failed to create portfolio');
+};
+
+export const updatePortfolio = async (id: string, data: { name?: string; description?: string; accountIds?: string[] }): Promise<void> => {
+    const payload: PortfolioUpdateRequest = {};
+    if (data.name) payload.name = data.name;
+    if (data.description !== undefined) payload.description = data.description;
+    if (data.accountIds) payload.account_ids = data.accountIds.map(aid => parseInt(aid));
+
+    const response = await fetch(`${API_BASE_URL}/api/v1/portfolios/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) throw new Error('Failed to update portfolio');
+};
+
+export const deletePortfolio = async (id: string): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/api/v1/portfolios/${id}`, {
+        method: 'DELETE',
+    });
+
+    if (!response.ok) throw new Error('Failed to delete portfolio');
+};
+
+
+// --- Transactions APIs ---
+
 export const fetchTransactions = async (): Promise<Transaction[]> => {
     try {
         const response = await fetch(`${API_BASE_URL}/api/v1/transactions/?limit=100`, {
@@ -353,12 +505,11 @@ export const fetchTransactions = async (): Promise<Transaction[]> => {
         return data.map(item => {
             const quantity = item.quantity ? parseFloat(item.quantity) : 0;
             const price = item.price_per_unit ? parseFloat(item.price_per_unit) : 0;
-            // Requirement: Total Amount = Quantity * Unit Price
             const amount = quantity * price;
 
             return {
                 id: item.id.toString(),
-                date: new Date(item.transaction_time).toISOString().split('T')[0], // Extract YYYY-MM-DD
+                date: new Date(item.transaction_time).toISOString().split('T')[0],
                 accountId: item.account_id.toString(),
                 accountName: item.account_name,
                 type: mapTransactionTypeToFrontend(item.type),
@@ -368,7 +519,7 @@ export const fetchTransactions = async (): Promise<Transaction[]> => {
                 pricePerUnit: item.price_per_unit ? price : null,
                 amount: amount,
                 fee: parseFloat(item.fee),
-                currency: Currency.USD, // Backend doesn't return currency yet, default to USD
+                currency: Currency.USD, 
                 notes: item.notes
             };
         });
@@ -379,10 +530,6 @@ export const fetchTransactions = async (): Promise<Transaction[]> => {
     }
 };
 
-/**
- * POST /api/v1/transactions/
- * Create Transaction
- */
 export const createTransaction = async (tx: Partial<Transaction> & { accountId: string; type: TransactionType }): Promise<void> => {
     const payload: TransactionCreateRequest = {
         account_id: parseInt(tx.accountId),
@@ -407,10 +554,6 @@ export const createTransaction = async (tx: Partial<Transaction> & { accountId: 
     }
 };
 
-/**
- * PATCH /api/v1/transactions/{id}
- * Update Transaction
- */
 export const updateTransaction = async (id: string, tx: Partial<Transaction>): Promise<void> => {
     const payload: TransactionUpdateRequest = {};
     if (tx.accountId) payload.account_id = parseInt(tx.accountId);
@@ -431,10 +574,6 @@ export const updateTransaction = async (id: string, tx: Partial<Transaction>): P
     if (!response.ok) throw new Error('Failed to update transaction');
 };
 
-/**
- * DELETE /api/v1/transactions/{id}
- * Delete Transaction
- */
 export const deleteTransaction = async (id: string): Promise<void> => {
     const response = await fetch(`${API_BASE_URL}/api/v1/transactions/${id}`, {
         method: 'DELETE',

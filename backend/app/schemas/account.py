@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 from typing import Optional
 from sqlmodel import SQLModel
 
@@ -18,6 +19,7 @@ class AccountCreate(AccountBase):
 class AccountRead(AccountBase):
     id: int
     created_at: datetime
+    total_balance: Decimal = Decimal(0)
 
 
 # Properties to receive on item update
