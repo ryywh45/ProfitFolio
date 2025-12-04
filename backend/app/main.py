@@ -1,10 +1,20 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import SQLiteDB
 from app.api.v1.api import api_router
 
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # print("🚀 System Starting...")
+    SQLiteDB.create_db_and_tables()
+    SQLiteDB.initialize()
+    
+    yield
+    # print("🛑 System Shutting down...")
+
+app = FastAPI(lifespan=lifespan)
 
 # 開發環境用
 origins = ["http://localhost:3000"]
@@ -17,9 +27,9 @@ app.add_middleware(
     allow_headers=["*"],    # 允許所有標頭，包括 'Content-Type'
 )
 
-@app.on_event("startup")
-def on_startup():
-    SQLiteDB.create_db_and_tables()
+# @app.on_event("startup")
+# def on_startup():
+#     SQLiteDB.create_db_and_tables()
 
 
 @app.get("/")
