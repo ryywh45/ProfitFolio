@@ -201,10 +201,12 @@ export const PortfolioDetails: React.FC<PortfolioDetailsProps> = ({ portfolioId,
                                                 <Cell key={`cell-${index}`} fill={entry.color} />
                                             ))}
                                         </Pie>
-                                        {/* <Tooltip 
+                                        <Tooltip 
                                             formatter={(value: number) => formatCurrency(value)}
                                             contentStyle={{ backgroundColor: '#191B1C', borderColor: '#2E3335', color: '#fff', borderRadius: '8px' }}
-                                        /> */}
+                                            itemStyle={{ color: '#fff' }}
+                                            wrapperStyle={{ zIndex: 1000 }}
+                                        />
                                     </PieChart>
                                 </ResponsiveContainer>
                                 <div className="absolute flex flex-col items-center pointer-events-none">
