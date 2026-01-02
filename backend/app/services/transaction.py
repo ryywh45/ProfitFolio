@@ -94,19 +94,60 @@ class TransactionService:
         self.session.refresh(position)
 
     def create_transaction(self, transaction_in: TransactionCreate) -> Transaction:
-        # If transaction_time is not provided, use current time with timezone
-        if transaction_in.transaction_time is None:
-            transaction_in.transaction_time = datetime.now(timezone(timedelta(hours=8)))
-            
+        # 1. 建立並儲存交易紀錄
         db_transaction = Transaction.model_validate(transaction_in)
         self.session.add(db_transaction)
+        
+        # 2. 處理 Position (持倉) 邏輯
+        # 只有 Buy/Sell/Deposit/Withdraw 會影響庫存，這裡以 Buy/Sell 為主範例
+        if transaction_in.asset_id:
+            # 搜尋該帳戶是否已有該資產的持倉
+            statement = select(Position).where(
+                Position.account_id == transaction_in.account_id,
+                Position.asset_id == transaction_in.asset_id
+            )
+            position = self.session.exec(statement).first()
+
+            # 如果沒有持倉，則建立一個新的
+            if not position:
+                position = Position(
+                    account_id=transaction_in.account_id,
+                    asset_id=transaction_in.asset_id,
+                    total_quantity=0,
+                    average_cost=0
+                )
+
+            # --- 計算邏輯 ---
+            qty = transaction_in.quantity or Decimal(0)
+            price = transaction_in.price_per_unit or Decimal(0)
+            fee = transaction_in.fee or Decimal(0)
+
+            if transaction_in.type == TransactionType.buy:
+                # 買入：增加數量，重新計算平均成本 (加權平均)
+                # 新總成本 = (舊數量 * 舊均價) + (新數量 * 新價格) + 手續費
+                old_total_cost = position.total_quantity * position.average_cost
+                new_cost_basis = (qty * price) + fee
+                
+                new_total_qty = position.total_quantity + qty
+                
+                if new_total_qty > 0:
+                    position.average_cost = (old_total_cost + new_cost_basis) / new_total_qty
+                position.total_quantity = new_total_qty
+
+            elif transaction_in.type == TransactionType.sell:
+                # 賣出：減少數量，平均成本通常不變 (除非你計算已實現損益，這裡先保持簡單)
+                position.total_quantity -= qty
+                # 若賣光了，確保數量不為負，且均價可歸零或保留
+                if position.total_quantity <= 0:
+                    position.total_quantity = 0
+                    position.average_cost = 0
+
+            # 3. 更新 Position
+            self.session.add(position)
+        
+        # 4. 提交所有變更 (Transaction + Position)
         self.session.commit()
         self.session.refresh(db_transaction)
-        
-        # Update Position
-        if db_transaction.asset_id:
-            self._recalculate_position(db_transaction.account_id, db_transaction.asset_id)
-            
         return db_transaction
 
     def get_transaction(self, transaction_id: int) -> Transaction | None:
